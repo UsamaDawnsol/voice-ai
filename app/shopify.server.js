@@ -6,6 +6,7 @@ import {
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+import debugLogger from "./utils/debug.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -23,6 +24,15 @@ const shopify = shopifyApp({
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
+  hooks: {
+    afterAuth: async ({ session, admin }) => {
+      debugLogger.logAuth('app_installed', session.shop, {
+        sessionId: session.id,
+        isOnline: session.isOnline,
+        scope: session.scope
+      });
+    },
+  },
 });
 
 export default shopify;

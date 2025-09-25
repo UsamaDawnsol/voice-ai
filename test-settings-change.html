@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Widget Settings Change</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .color-test {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        .red { background-color: #ff0000; }
+        .blue { background-color: #007bff; }
+        .green { background-color: #28a745; }
+        .purple { background-color: #6f42c1; }
+        .orange { background-color: #fd7e14; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Test Widget Settings Change</h1>
+    
+    <div class="container">
+        <h2>Current Widget Status</h2>
+        <div id="widgetStatus"></div>
+        <button onclick="checkWidgetStatus()">Check Widget Status</button>
+    </div>
+
+    <div class="container">
+        <h2>Test Color Changes</h2>
+        <p>Click on colors to test if widget changes:</p>
+        <div class="color-test">
+            <div class="color-btn red" onclick="testColor('#ff0000')" title="Red"></div>
+            <div class="color-btn blue" onclick="testColor('#007bff')" title="Blue"></div>
+            <div class="color-btn green" onclick="testColor('#28a745')" title="Green"></div>
+            <div class="color-btn purple" onclick="testColor('#6f42c1')" title="Purple"></div>
+            <div class="color-btn orange" onclick="testColor('#fd7e14')" title="Orange"></div>
+        </div>
+        <div id="colorTest"></div>
+    </div>
+
+    <div class="container">
+        <h2>Manual Test Steps</h2>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px;">
+            <h3>Step 1: Change Settings in Admin</h3>
+            <ol>
+                <li>Go to your Shopify admin panel</li>
+                <li>Navigate to "Widget Settings"</li>
+                <li>Change background color to <strong>red (#ff0000)</strong></li>
+                <li>Save the settings</li>
+            </ol>
+            
+            <h3>Step 2: Check Live Widget</h3>
+            <ol>
+                <li>Go to your live website</li>
+                <li>Look for the floating widget (microphone icon)</li>
+                <li>Check if the color changed to red</li>
+                <li>If not, try hard refresh (Ctrl+F5)</li>
+            </ol>
+            
+            <h3>Step 3: Test Different Colors</h3>
+            <ol>
+                <li>Try changing to different colors in admin</li>
+                <li>Save each time</li>
+                <li>Check if widget updates on live site</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>Debug Information</h2>
+        <div id="debugInfo"></div>
+        <button onclick="getDebugInfo()">Get Debug Info</button>
+        <button onclick="clearLocalStorage()">Clear Local Storage</button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:53551';
+        const SHOP = 'voiceaiapp.myshopify.com';
+
+        function addStatus(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+            container.appendChild(statusDiv);
+        }
+
+        function clearStatus(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        function checkWidgetStatus() {
+            clearStatus('widgetStatus');
+            addStatus('widgetStatus', '🔄 Checking widget status...', 'info');
+
+            const widget = document.getElementById('voice-ai-widget');
+            if (widget) {
+                addStatus('widgetStatus', '✅ Widget found on page', 'success');
+                addStatus('widgetStatus', `🎨 Current background: ${widget.style.backgroundColor}`, 'info');
+                addStatus('widgetStatus', `📍 Position: ${widget.style.right || widget.style.left}`, 'info');
+                addStatus('widgetStatus', `📏 Size: ${widget.style.width} x ${widget.style.height}`, 'info');
+            } else {
+                addStatus('widgetStatus', '⚠️ Widget not found on page', 'error');
+                addStatus('widgetStatus', '💡 Try loading the embed script', 'info');
+            }
+
+            // Check localStorage
+            const settingsHash = localStorage.getItem('voiceAIWidgetSettingsHash');
+            if (settingsHash) {
+                addStatus('widgetStatus', `🔑 Settings hash: ${settingsHash.substring(0, 20)}...`, 'info');
+            } else {
+                addStatus('widgetStatus', '⚠️ No settings hash found in localStorage', 'warning');
+            }
+        }
+
+        function testColor(color) {
+            clearStatus('colorTest');
+            addStatus('colorTest', `🔄 Testing color change to ${color}...`, 'info');
+
+            const widget = document.getElementById('voice-ai-widget');
+            if (widget) {
+                const oldColor = widget.style.backgroundColor;
+                widget.style.backgroundColor = color;
+                addStatus('colorTest', `✅ Widget color changed from ${oldColor} to ${color}`, 'success');
+                addStatus('colorTest', '💡 This is a manual test. Real changes come from admin panel.', 'info');
+            } else {
+                addStatus('colorTest', '❌ Widget not found. Cannot test color change.', 'error');
+            }
+        }
+
+        function getDebugInfo() {
+            clearStatus('debugInfo');
+            addStatus('debugInfo', '🔄 Getting debug information...', 'info');
+
+            try {
+                // Get current settings from API
+                fetch(`${API_BASE}/debug-widget?shop=${SHOP}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.widgetSettings) {
+                            addStatus('debugInfo', '✅ Current settings from database:', 'success');
+                            addStatus('debugInfo', `🎨 Background: ${data.widgetSettings.backgroundColor}`, 'info');
+                            addStatus('debugInfo', `🎯 Position: ${data.widgetSettings.position}`, 'info');
+                            addStatus('debugInfo', `✅ Active: ${data.widgetSettings.isActive}`, 'info');
+                        } else {
+                            addStatus('debugInfo', '⚠️ No settings found in database', 'warning');
+                        }
+                    })
+                    .catch(error => {
+                        addStatus('debugInfo', `❌ API error: ${error.message}`, 'error');
+                    });
+
+                // Get localStorage info
+                const settingsHash = localStorage.getItem('voiceAIWidgetSettingsHash');
+                const sessionId = localStorage.getItem('voice-ai-session-id');
+                const customerId = localStorage.getItem('voice-ai-customer-id');
+
+                addStatus('debugInfo', '📱 LocalStorage info:', 'info');
+                addStatus('debugInfo', `🔑 Settings hash: ${settingsHash || 'None'}`, 'info');
+                addStatus('debugInfo', `🆔 Session ID: ${sessionId || 'None'}`, 'info');
+                addStatus('debugInfo', `👤 Customer ID: ${customerId || 'None'}`, 'info');
+
+                // Get widget config
+                if (window.voiceAIWidget) {
+                    addStatus('debugInfo', '🤖 Widget config:', 'info');
+                    addStatus('debugInfo', `🎨 Config background: ${window.voiceAIWidget.backgroundColor}`, 'info');
+                    addStatus('debugInfo', `🎯 Config position: ${window.voiceAIWidget.position}`, 'info');
+                    addStatus('debugInfo', `✅ Config enabled: ${window.voiceAIWidget.enabled}`, 'info');
+                } else {
+                    addStatus('debugInfo', '⚠️ No widget config found', 'warning');
+                }
+
+            } catch (error) {
+                addStatus('debugInfo', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function clearLocalStorage() {
+            clearStatus('debugInfo');
+            addStatus('debugInfo', '🔄 Clearing localStorage...', 'info');
+            
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            addStatus('debugInfo', '✅ LocalStorage cleared', 'success');
+            addStatus('debugInfo', '💡 Refresh the page to see changes', 'info');
+        }
+
+        // Auto-run on page load
+        window.onload = function() {
+            addStatus('widgetStatus', '🚀 Widget Settings Change Test Page Loaded', 'info');
+            addStatus('widgetStatus', 'Click "Check Widget Status" to start testing', 'info');
+        };
+    </script>
+</body>
+</html>

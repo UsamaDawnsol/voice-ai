@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Widget Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f9f9f9;
+        }
+        .test-section h2 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .widget-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Voice AI Widget Test Page</h1>
+        
+        <div class="widget-info">
+            <h3>Widget Status</h3>
+            <div id="widget-status" class="status info">Checking widget...</div>
+            <p>Look for the floating microphone icon in the bottom-right corner of this page.</p>
+        </div>
+        
+        <div class="test-section">
+            <h2>🧪 Test Instructions</h2>
+            <ol>
+                <li>Look for the floating 🎤 icon in the bottom-right corner</li>
+                <li>Click on the icon to open the chat interface</li>
+                <li>Try typing a message and clicking "Send"</li>
+                <li>Try the "Voice Input" button (requires microphone permission)</li>
+                <li>Test closing the modal by clicking the X or outside the modal</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <h2>🔧 Test Controls</h2>
+            <button onclick="testWidget()">Test Widget Functionality</button>
+            <button onclick="checkElements()">Check DOM Elements</button>
+            <button onclick="simulateClick()">Simulate Widget Click</button>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+        
+        <div class="test-section">
+            <h2>📊 Test Results</h2>
+            <div id="test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>🐛 Debug Information</h2>
+            <div id="debug-info"></div>
+        </div>
+    </div>
+
+    <!-- Load the fixed widget -->
+    <script src="voice-ai-widget-fixed.js"></script>
+    
+    <script>
+        // Test functions
+        function testWidget() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<div class="status info">Running tests...</div>';
+            
+            setTimeout(() => {
+                let testResults = [];
+                
+                // Test 1: Check if widget exists
+                const widget = document.getElementById('voice-ai-widget');
+                if (widget) {
+                    testResults.push('<div class="status success">✅ Widget element found</div>');
+                } else {
+                    testResults.push('<div class="status error">❌ Widget element not found</div>');
+                }
+                
+                // Test 2: Check if modal exists
+                const modal = document.getElementById('voice-ai-modal');
+                if (modal) {
+                    testResults.push('<div class="status success">✅ Modal element found</div>');
+                } else {
+                    testResults.push('<div class="status error">❌ Modal element not found</div>');
+                }
+                
+                // Test 3: Check if chat elements exist
+                const chatInput = document.getElementById('chat-input');
+                const sendBtn = document.getElementById('send-btn');
+                const voiceBtn = document.getElementById('voice-btn');
+                
+                if (chatInput && sendBtn && voiceBtn) {
+                    testResults.push('<div class="status success">✅ Chat interface elements found</div>');
+                } else {
+                    testResults.push('<div class="status error">❌ Chat interface elements missing</div>');
+                }
+                
+                // Test 4: Check widget visibility
+                if (widget && widget.style.display !== 'none') {
+                    testResults.push('<div class="status success">✅ Widget is visible</div>');
+                } else {
+                    testResults.push('<div class="status error">❌ Widget is not visible</div>');
+                }
+                
+                results.innerHTML = testResults.join('');
+            }, 1000);
+        }
+        
+        function checkElements() {
+            const debugInfo = document.getElementById('debug-info');
+            const elements = [
+                'voice-ai-widget',
+                'voice-ai-modal',
+                'chat-messages',
+                'chat-input',
+                'send-btn',
+                'voice-btn'
+            ];
+            
+            let info = '<h4>DOM Elements Check:</h4>';
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    info += `<div class="status success">✅ ${id} - Found</div>`;
+                } else {
+                    info += `<div class="status error">❌ ${id} - Not found</div>`;
+                }
+            });
+            
+            debugInfo.innerHTML = info;
+        }
+        
+        function simulateClick() {
+            const widget = document.getElementById('voice-ai-widget');
+            if (widget) {
+                widget.click();
+                document.getElementById('test-results').innerHTML = '<div class="status success">✅ Widget click simulated</div>';
+            } else {
+                document.getElementById('test-results').innerHTML = '<div class="status error">❌ Widget not found for click simulation</div>';
+            }
+        }
+        
+        function clearConsole() {
+            console.clear();
+            document.getElementById('debug-info').innerHTML = '<div class="status info">Console cleared</div>';
+        }
+        
+        // Auto-check widget status
+        setTimeout(() => {
+            const widget = document.getElementById('voice-ai-widget');
+            const status = document.getElementById('widget-status');
+            
+            if (widget) {
+                status.innerHTML = '✅ Widget loaded successfully!';
+                status.className = 'status success';
+            } else {
+                status.innerHTML = '❌ Widget failed to load';
+                status.className = 'status error';
+            }
+        }, 2000);
+        
+        // Monitor for errors
+        window.addEventListener('error', function(e) {
+            console.error('Widget Error:', e.error);
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.innerHTML += `<div class="status error">Error: ${e.message}</div>`;
+        });
+        
+        // Log widget initialization
+        console.log('Voice AI Widget Test Page Loaded');
+        console.log('Waiting for widget to initialize...');
+    </script>
+</body>
+</html>

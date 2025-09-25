@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Card,
   Layout,
   Link,
@@ -13,29 +14,49 @@ import { TitleBar } from "@shopify/app-bridge-react";
 export default function AdditionalPage() {
   return (
     <Page>
-      <TitleBar title="Additional page" />
+      <TitleBar title="Theme Extension" />
       <Layout>
         <Layout.Section>
           <Card>
-            <BlockStack gap="300">
-              <Text as="p" variant="bodyMd">
-                The app template comes with an additional page which
-                demonstrates how to create multiple pages within app navigation
-                using{" "}
-                <Link
-                  url="https://shopify.dev/docs/apps/tools/app-bridge"
-                  target="_blank"
-                  removeUnderline
-                >
-                  App Bridge
-                </Link>
-                .
+            <BlockStack gap="400">
+              <Text as="h2" variant="headingMd">
+                Voice AI Theme Extension
               </Text>
               <Text as="p" variant="bodyMd">
-                To create your own page and have it show up in the app
-                navigation, add a page inside <Code>app/routes</Code>, and a
-                link to it in the <Code>&lt;NavMenu&gt;</Code> component found
-                in <Code>app/routes/app.jsx</Code>.
+                The Voice AI theme extension makes it easy to add the floating widget to your store. 
+                Simply install the extension and configure the settings through your theme customizer.
+              </Text>
+              
+              <Text as="h3" variant="headingMd">
+                Installation Steps:
+              </Text>
+              <List>
+                <List.Item>
+                  Go to your Shopify admin → Online Store → Themes
+                </List.Item>
+                <List.Item>
+                  Click "Customize" on your active theme
+                </List.Item>
+                <List.Item>
+                  In the theme editor, look for "Voice AI Widget" in the available blocks
+                </List.Item>
+                <List.Item>
+                  Add the block to your theme and configure the settings
+                </List.Item>
+                <List.Item>
+                  Save your changes and publish the theme
+                </List.Item>
+              </List>
+
+              <Text as="h3" variant="headingMd">
+                Alternative Installation:
+              </Text>
+              <Text as="p" variant="bodyMd">
+                If you prefer to add the widget manually, you can use the embed code from the{" "}
+                <Link url="/app/widget-settings" removeUnderline>
+                  Widget Settings
+                </Link>{" "}
+                page. Simply copy the code and add it to your theme's layout files.
               </Text>
             </BlockStack>
           </Card>
@@ -44,19 +65,40 @@ export default function AdditionalPage() {
           <Card>
             <BlockStack gap="200">
               <Text as="h2" variant="headingMd">
-                Resources
+                Extension Features
               </Text>
               <List>
                 <List.Item>
-                  <Link
-                    url="https://shopify.dev/docs/apps/design-guidelines/navigation#app-nav"
-                    target="_blank"
-                    removeUnderline
-                  >
-                    App nav best practices
-                  </Link>
+                  Easy theme integration
+                </List.Item>
+                <List.Item>
+                  Customizable colors and position
+                </List.Item>
+                <List.Item>
+                  Enable/disable toggle
+                </List.Item>
+                <List.Item>
+                  Mobile responsive
+                </List.Item>
+                <List.Item>
+                  Voice input support
                 </List.Item>
               </List>
+            </BlockStack>
+          </Card>
+          
+          <Card>
+            <BlockStack gap="200">
+              <Text as="h2" variant="headingMd">
+                Need Help?
+              </Text>
+              <Text as="p" variant="bodyMd">
+                If you need assistance with installation or configuration, 
+                check the Widget Settings page for detailed customization options.
+              </Text>
+              <Button url="/app/widget-settings" variant="primary">
+                Go to Widget Settings
+              </Button>
             </BlockStack>
           </Card>
         </Layout.Section>

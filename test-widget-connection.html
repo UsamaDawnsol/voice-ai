@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Widget Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .success { background: rgba(40, 167, 69, 0.3); border: 2px solid #28a745; }
+        .error { background: rgba(220, 53, 69, 0.3); border: 2px solid #dc3545; }
+        .info { background: rgba(23, 162, 184, 0.3); border: 2px solid #17a2b8; }
+        .warning { background: rgba(255, 193, 7, 0.3); border: 2px solid #ffc107; color: #000; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+        }
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Voice AI Widget Connection Test</h1>
+        <p>This page tests if your floating widget is properly connected to the backend.</p>
+        
+        <div class="test-section">
+            <h3>📊 Connection Status</h3>
+            <div id="connection-status">
+                <div class="status info">Checking connection...</div>
+            </div>
+            <button onclick="testConnection()">🔄 Test Connection</button>
+            <button onclick="checkWidget()">🎤 Check Widget</button>
+            <button onclick="testSettings()">⚙️ Test Settings</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔗 Embed Script Test</h3>
+            <div id="embed-test">
+                <div class="status info">Loading embed script...</div>
+            </div>
+            <button onclick="loadEmbedScript()">📥 Load Embed Script</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Test Results</h3>
+            <div id="test-results">
+                <div class="status info">Ready to test...</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🛠️ Debug Information</h3>
+            <div id="debug-info">
+                <pre id="debug-output">Loading debug information...</pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Test configuration
+        const APP_URL = 'https://privileges-raised-northern-interview.trycloudflare.com';
+        const SHOP = 'voiceaidawnsol.myshopify.com';
+        
+        let testResults = {
+            embedScript: false,
+            widgetLoaded: false,
+            settingsLoaded: false,
+            backendConnection: false
+        };
+
+        // Test embed script loading
+        async function loadEmbedScript() {
+            const embedTest = document.getElementById('embed-test');
+            try {
+                embedTest.innerHTML = '<div class="status info">Loading embed script...</div>';
+                
+                const script = document.createElement('script');
+                script.src = `${APP_URL}/embed?shop=${SHOP}&t=${Date.now()}`;
+                script.onload = () => {
+                    embedTest.innerHTML = '<div class="status success">✅ Embed script loaded successfully!</div>';
+                    testResults.embedScript = true;
+                    updateTestResults();
+                };
+                script.onerror = () => {
+                    embedTest.innerHTML = '<div class="status error">❌ Failed to load embed script</div>';
+                    testResults.embedScript = false;
+                    updateTestResults();
+                };
+                document.head.appendChild(script);
+            } catch (error) {
+                embedTest.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+                testResults.embedScript = false;
+                updateTestResults();
+            }
+        }
+
+        // Test widget presence
+        function checkWidget() {
+            const widget = document.getElementById('voice-ai-widget');
+            const modal = document.getElementById('voice-ai-modal');
+            const status = document.getElementById('connection-status');
+            
+            if (widget && modal) {
+                status.innerHTML = '<div class="status success">✅ Widget found! Widget is connected to backend.</div>';
+                testResults.widgetLoaded = true;
+            } else {
+                status.innerHTML = '<div class="status warning">⚠️ Widget not found. Make sure embed script is loaded.</div>';
+                testResults.widgetLoaded = false;
+            }
+            updateTestResults();
+        }
+
+        // Test settings connection
+        async function testSettings() {
+            try {
+                const response = await fetch(`${APP_URL}/embed?shop=${SHOP}&t=${Date.now()}`);
+                if (response.ok) {
+                    const script = await response.text();
+                    if (script.includes('voiceAIWidget') && script.includes('backgroundColor')) {
+                        document.getElementById('test-results').innerHTML = 
+                            '<div class="status success">✅ Settings loaded from backend successfully!</div>';
+                        testResults.settingsLoaded = true;
+                    } else {
+                        document.getElementById('test-results').innerHTML = 
+                            '<div class="status error">❌ Settings not found in embed script</div>';
+                        testResults.settingsLoaded = false;
+                    }
+                } else {
+                    document.getElementById('test-results').innerHTML = 
+                        '<div class="status error">❌ Failed to fetch settings from backend</div>';
+                    testResults.settingsLoaded = false;
+                }
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = 
+                    `<div class="status error">❌ Error fetching settings: ${error.message}</div>`;
+                testResults.settingsLoaded = false;
+            }
+            updateTestResults();
+        }
+
+        // Test overall connection
+        async function testConnection() {
+            const status = document.getElementById('connection-status');
+            status.innerHTML = '<div class="status info">Testing connection...</div>';
+            
+            try {
+                // Test if app is running
+                const response = await fetch(`${APP_URL}/embed?shop=${SHOP}`);
+                if (response.ok) {
+                    status.innerHTML = '<div class="status success">✅ Backend connection successful!</div>';
+                    testResults.backendConnection = true;
+                } else {
+                    status.innerHTML = '<div class="status error">❌ Backend connection failed</div>';
+                    testResults.backendConnection = false;
+                }
+            } catch (error) {
+                status.innerHTML = `<div class="status error">❌ Connection error: ${error.message}</div>`;
+                testResults.backendConnection = false;
+            }
+            updateTestResults();
+        }
+
+        // Update test results
+        function updateTestResults() {
+            const results = document.getElementById('test-results');
+            const passed = Object.values(testResults).filter(Boolean).length;
+            const total = Object.keys(testResults).length;
+            
+            let statusClass = 'info';
+            let statusText = 'Testing...';
+            
+            if (passed === total) {
+                statusClass = 'success';
+                statusText = `✅ All tests passed! (${passed}/${total})`;
+            } else if (passed > 0) {
+                statusClass = 'warning';
+                statusText = `⚠️ Partial success (${passed}/${total})`;
+            } else {
+                statusClass = 'error';
+                statusText = `❌ All tests failed (${passed}/${total})`;
+            }
+            
+            results.innerHTML = `
+                <div class="status ${statusClass}">${statusText}</div>
+                <div style="margin-top: 10px;">
+                    <strong>Test Details:</strong><br>
+                    • Embed Script: ${testResults.embedScript ? '✅' : '❌'}<br>
+                    • Widget Loaded: ${testResults.widgetLoaded ? '✅' : '❌'}<br>
+                    • Settings Loaded: ${testResults.settingsLoaded ? '✅' : '❌'}<br>
+                    • Backend Connection: ${testResults.backendConnection ? '✅' : '❌'}
+                </div>
+            `;
+        }
+
+        // Update debug information
+        function updateDebugInfo() {
+            const debugOutput = document.getElementById('debug-output');
+            const info = {
+                appUrl: APP_URL,
+                shop: SHOP,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                windowSize: `${window.innerWidth}x${window.innerHeight}`,
+                protocol: window.location.protocol,
+                host: window.location.host,
+                widgetElements: {
+                    widget: !!document.getElementById('voice-ai-widget'),
+                    modal: !!document.getElementById('voice-ai-modal'),
+                    script: !!document.querySelector('script[src*="/embed"]')
+                },
+                localStorage: {
+                    settingsHash: localStorage.getItem('voiceAIWidgetSettingsHash'),
+                    sessionId: localStorage.getItem('voice-ai-session-id')
+                }
+            };
+            
+            debugOutput.textContent = JSON.stringify(info, null, 2);
+        }
+
+        // Initialize page
+        window.addEventListener('load', () => {
+            updateDebugInfo();
+            loadEmbedScript();
+            
+            // Check for widget after a short delay
+            setTimeout(() => {
+                checkWidget();
+                testSettings();
+            }, 2000);
+        });
+
+        // Update debug info periodically
+        setInterval(updateDebugInfo, 5000);
+    </script>
+</body>
+</html>

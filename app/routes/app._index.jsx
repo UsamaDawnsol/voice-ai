@@ -106,7 +106,7 @@ export default function Index() {
 
   return (
     <Page>
-      <TitleBar title="Remix app template">
+      <TitleBar title="Voice AI - Floating Widget">
         <button variant="primary" onClick={generateProduct}>
           Generate a product
         </button>
@@ -118,63 +118,47 @@ export default function Index() {
               <BlockStack gap="500">
                 <BlockStack gap="200">
                   <Text as="h2" variant="headingMd">
-                    Congrats on creating a new Shopify app 🎉
+                    Welcome to Voice AI Widget 🎤
                   </Text>
                   <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
-                    <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      App Bridge
+                    Create a floating Voice AI assistant for your store that customers can interact with using voice or text. 
+                    Customize the design, position, and colors through the{" "}
+                    <Link url="/app/widget-settings" removeUnderline>
+                      Widget Settings
                     </Link>{" "}
-                    interface examples like an{" "}
+                    page, or install the{" "}
                     <Link url="/app/additional" removeUnderline>
-                      additional page in the app nav
-                    </Link>
-                    , as well as an{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      Admin GraphQL
+                      theme extension
                     </Link>{" "}
-                    mutation demo, to provide a starting point for app
-                    development.
+                    for easy setup.
                   </Text>
                 </BlockStack>
                 <BlockStack gap="200">
                   <Text as="h3" variant="headingMd">
-                    Get started with products
+                    Features
                   </Text>
                   <Text as="p" variant="bodyMd">
-                    Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      productCreate
-                    </Link>{" "}
-                    mutation in our API references.
+                    • Floating widget that appears on your store pages<br/>
+                    • Voice input using browser speech recognition<br/>
+                    • Text-based chat interface<br/>
+                    • Customizable colors and position<br/>
+                    • Easy installation via theme extension or embed code<br/>
+                    • Mobile-responsive design
                   </Text>
                 </BlockStack>
                 <InlineStack gap="300">
-                  <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product
+                  <Button 
+                    url="/app/widget-settings" 
+                    variant="primary"
+                  >
+                    Configure Widget
                   </Button>
-                  {fetcher.data?.product && (
-                    <Button
-                      url={`shopify:admin/products/${productId}`}
-                      target="_blank"
-                      variant="plain"
-                    >
-                      View product
-                    </Button>
-                  )}
+                  <Button 
+                    url="/app/additional" 
+                    variant="secondary"
+                  >
+                    View Theme Extension
+                  </Button>
                 </InlineStack>
                 {fetcher.data?.product && (
                   <>

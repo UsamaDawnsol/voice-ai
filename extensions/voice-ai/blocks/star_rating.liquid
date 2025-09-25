@@ -1,20 +1,91 @@
-{% assign avg_rating = block.settings.product.metafields.demo.avg_rating.value | round %}
-<span style="color:{{ block.settings.colour }}">
-  {% render 'stars', rating: avg_rating %}
-</span>
-{% if avg_rating >= 4 %}
-  <br>
-  <img src="{{ "thumbs-up.png" | asset_img_url: '15x' }}" height="15" width="15" loading="lazy">
-  {{ 'ratings.home.recommendationText' | t }}
+{% comment %}
+  Voice AI Widget - Floating Chat Assistant
+  This block adds a floating Voice AI widget to your store
+  Compatible with Shopify Theme Extensions
+{% endcomment %}
+
+{% comment %}
+  Voice AI Widget - Theme Extension
+  This block adds a floating Voice AI widget to your store
+  Configure settings through the Shopify admin dashboard
+{% endcomment %}
+
+{% if block.settings.enable_widget %}
+  <script>
+    // Widget configuration from theme settings
+    window.voiceAIWidget = {
+      shop: '{{ shop.permanent_domain }}',
+      shopName: '{{ shop.name }}',
+      backgroundColor: '{{ block.settings.background_color | default: "#007bff" }}',
+      iconColor: '{{ block.settings.icon_color | default: "#ffffff" }}',
+      position: '{{ block.settings.position | default: "right" }}',
+      enabled: {{ block.settings.enable_widget }},
+      theme: '{{ theme.name }}',
+      currency: '{{ shop.currency }}',
+      locale: '{{ shop.locale }}',
+      customMessage: 'Hello! How can I help you today?',
+      widgetSize: 60,
+      publishedFromTheme: true
+    };
+  </script>
+  
+  <!-- Load widget script -->
+  <script src="{{ 'voice-ai-widget.js' | asset_url }}" defer></script>
 {% endif %}
 
 {% schema %}
 {
-  "name": "Star Rating",
-  "target": "section",
+  "name": "Voice AI Widget",
+  "target": "body",
   "settings": [
-    { "type": "product", "id": "product", "label": "product", "autofill": true },
-    { "type": "color", "id": "colour", "label": "Star Colour", "default": "#ff0000" }
+    {
+      "type": "header",
+      "content": "Voice AI Widget Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_widget",
+      "label": "Enable Voice AI Widget",
+      "default": true,
+      "info": "Enable or disable the floating Voice AI widget on your store"
+    },
+    {
+      "type": "header",
+      "content": "Appearance Settings"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Widget Background Color",
+      "default": "#007bff",
+      "info": "Choose the background color for the floating widget"
+    },
+    {
+      "type": "color",
+      "id": "icon_color",
+      "label": "Icon Color",
+      "default": "#ffffff",
+      "info": "Choose the color for the microphone icon"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Widget Position",
+      "options": [
+        { "value": "right", "label": "Right Side" },
+        { "value": "left", "label": "Left Side" }
+      ],
+      "default": "right",
+      "info": "Choose which side of the screen the widget appears on"
+    },
+    {
+      "type": "header",
+      "content": "Advanced Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "For advanced configuration, visit the Voice AI app in your Shopify admin panel."
+    }
   ]
 }
 {% endschema %}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopify Voice AI Widget Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .shopify-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Shopify Voice AI Widget Test</h1>
+        
+        <div class="shopify-info">
+            <h3>Shopify Theme Extension Test</h3>
+            <p>This test simulates the Shopify theme extension environment with proper configuration.</p>
+        </div>
+        
+        <div class="info">
+            <h3>Test Instructions:</h3>
+            <ol>
+                <li>Look for the floating 🎤 icon in bottom-right corner</li>
+                <li>Click on it to open the chat interface</li>
+                <li>Try typing and sending messages</li>
+                <li>Try voice input (requires microphone permission)</li>
+                <li>Test the close functionality</li>
+            </ol>
+        </div>
+        
+        <div id="status" class="status info">
+            Loading Shopify widget...
+        </div>
+        
+        <div class="info">
+            <h3>Debug Information:</h3>
+            <div id="debug"></div>
+        </div>
+        
+        <div class="info">
+            <h3>Widget Configuration:</h3>
+            <div id="config"></div>
+        </div>
+    </div>
+
+    <!-- Simulate Shopify configuration -->
+    <script>
+        // Simulate Shopify theme extension configuration
+        window.voiceAIWidget = {
+            shop: 'test-shop.myshopify.com',
+            shopName: 'Test Shop',
+            backgroundColor: '#007bff',
+            iconColor: '#ffffff',
+            position: 'right',
+            enabled: true,
+            theme: 'Dawn',
+            currency: 'USD',
+            locale: 'en',
+            customMessage: 'Hello! How can I help you today?'
+        };
+    </script>
+    
+    <!-- Load Shopify widget -->
+    <script src="extensions/voice-ai/assets/voice-ai-widget.js"></script>
+    
+    <script>
+        // Check widget status
+        setTimeout(() => {
+            const widget = document.getElementById('voice-ai-widget');
+            const status = document.getElementById('status');
+            const debug = document.getElementById('debug');
+            const config = document.getElementById('config');
+            
+            if (widget) {
+                status.innerHTML = '✅ Shopify Widget loaded successfully!';
+                status.className = 'status success';
+                debug.innerHTML = 'Widget found and working perfectly with Shopify structure.';
+                
+                // Show configuration
+                config.innerHTML = `
+                    <pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; font-size: 12px;">
+Shop: ${window.voiceAIWidget.shop}
+Shop Name: ${window.voiceAIWidget.shopName}
+Background Color: ${window.voiceAIWidget.backgroundColor}
+Icon Color: ${window.voiceAIWidget.iconColor}
+Position: ${window.voiceAIWidget.position}
+Theme: ${window.voiceAIWidget.theme}
+Currency: ${window.voiceAIWidget.currency}
+Locale: ${window.voiceAIWidget.locale}
+                    </pre>
+                `;
+            } else {
+                status.innerHTML = '❌ Widget failed to load.';
+                status.className = 'status error';
+                debug.innerHTML = 'Widget not found. Check console for errors.';
+            }
+        }, 2000);
+        
+        // Monitor errors
+        window.addEventListener('error', function(e) {
+            console.error('Error:', e.error);
+            const debug = document.getElementById('debug');
+            debug.innerHTML += '<br>Error: ' + e.message;
+        });
+        
+        console.log('Shopify Voice AI Widget Test Page Loaded');
+        console.log('Configuration:', window.voiceAIWidget);
+    </script>
+</body>
+</html>

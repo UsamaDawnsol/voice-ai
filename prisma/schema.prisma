@@ -30,3 +30,113 @@ model Session {
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
 }
+
+model WidgetSettings {
+  id             String   @id @default(cuid())
+  shop           String   @unique
+  backgroundColor String  @default("#007bff")
+  iconColor      String   @default("#ffffff")
+  position       String   @default("right")
+  isActive       Boolean  @default(true)
+  publishedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+// RAG Chatbot Models
+model Merchant {
+  id           String   @id @default(cuid())
+  shop         String   @unique
+  accessToken  String
+  settings     Json?    // Bot configuration, tone, etc.
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  // Relations
+  documents    Document[]
+  chats        Chat[]
+  webhooks     Webhook[]
+}
+
+model Document {
+  id          String   @id @default(cuid())
+  merchantId  String
+  source      String   // 'product', 'collection', 'page', 'faq'
+  sourceId    String   // Shopify ID
+  title       String
+  content     String
+  embedding   String?  // Vector embedding (JSON string)
+  metadata    Json?    // Additional metadata
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+}
+
+model Chat {
+  id          String   @id @default(cuid())
+  merchantId  String
+  sessionId   String
+  customerId  String?
+  status      String   @default("active") // 'active', 'closed', 'escalated'
+  metadata    Json?    // Customer info, device, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  messages    Message[]
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  chatId      String
+  sender      String   // 'customer', 'bot', 'agent'
+  text        String
+  metadata    Json?    // AI model used, confidence, etc.
+  createdAt   DateTime @default(now())
+  
+  // Relations
+  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+}
+
+model Webhook {
+  id          String   @id @default(cuid())
+  merchantId  String
+  topic       String   // 'products/create', 'products/update', etc.
+  isActive    Boolean  @default(true)
+  lastTrigger DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+}
+
+model IngestionJob {
+  id          String   @id @default(cuid())
+  merchantId  String
+  type        String   // 'full', 'incremental', 'webhook'
+  status      String   // 'pending', 'running', 'completed', 'failed'
+  progress    Int      @default(0)
+  total       Int      @default(0)
+  error       String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Floating Chat Widget Configuration
+model WidgetConfig {
+  id        String   @id @default(cuid())
+  shop      String   @unique
+  title     String   @default("Support Chat")
+  color     String   @default("#e63946")
+  greeting  String   @default("👋 Welcome! How can we help you?")
+  position  String   @default("right") // 'left' or 'right'
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

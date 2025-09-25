@@ -69,5 +69,14 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ["@shopify/app-bridge-react", "@shopify/polaris"],
+    exclude: ["crypto"],
+  },
+  define: {
+    global: "globalThis",
+  },
+  resolve: {
+    alias: {
+      crypto: "crypto-browserify",
+    },
   },
 });

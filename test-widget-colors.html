@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI Widget Color Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .widget-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .color-test {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .color-box {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Voice AI Widget Color Test</h1>
+        <p>Testing if the color fix works properly...</p>
+        
+        <div id="status" class="status info">Loading widget...</div>
+        
+        <div class="color-test">
+            <div>
+                <h3>Background Color</h3>
+                <div id="bg-color" class="color-box">Loading...</div>
+            </div>
+            <div>
+                <h3>Icon Color</h3>
+                <div id="icon-color" class="color-box">Loading...</div>
+            </div>
+        </div>
+        
+        <div id="widget-info" class="widget-info">Loading widget configuration...</div>
+        
+        <button onclick="testColors()">🔄 Test Colors</button>
+        <button onclick="checkWidget()">🎤 Check Widget</button>
+    </div>
+
+    <script>
+        const APP_URL = 'https://located-dude-supporting-plugin.trycloudflare.com';
+        const SHOP = 'voiceaidawnsol.myshopify.com';
+        
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.textContent = message;
+        }
+        
+        function testColors() {
+            updateStatus('Testing color configuration...', 'info');
+            
+            // Check if widget config is loaded
+            if (window.voiceAIWidget) {
+                const config = window.voiceAIWidget;
+                
+                // Test background color
+                const bgColor = config.backgroundColor;
+                const bgColorBox = document.getElementById('bg-color');
+                bgColorBox.style.backgroundColor = bgColor;
+                bgColorBox.textContent = bgColor;
+                
+                // Test icon color
+                const iconColor = config.iconColor;
+                const iconColorBox = document.getElementById('icon-color');
+                iconColorBox.style.backgroundColor = iconColor;
+                iconColorBox.textContent = iconColor;
+                
+                // Check if colors are valid
+                const bgValid = bgColor && bgColor.startsWith('#') && bgColor.length === 7;
+                const iconValid = iconColor && iconColor.startsWith('#') && iconColor.length === 7;
+                
+                if (bgValid && iconValid) {
+                    updateStatus('✅ Colors are working correctly!', 'success');
+                } else {
+                    updateStatus('❌ Color format issue detected', 'error');
+                }
+                
+                // Update widget info
+                document.getElementById('widget-info').textContent = 
+                    `Widget Config: ${JSON.stringify(config, null, 2)}`;
+            } else {
+                updateStatus('❌ Widget configuration not loaded', 'error');
+            }
+        }
+        
+        function checkWidget() {
+            const widget = document.getElementById('voice-ai-widget');
+            if (widget) {
+                updateStatus('✅ Widget found on page!', 'success');
+                
+                // Check widget colors
+                const widgetBg = window.getComputedStyle(widget).backgroundColor;
+                const widgetColor = window.getComputedStyle(widget).color;
+                
+                document.getElementById('widget-info').textContent = 
+                    `Widget found! Background: ${widgetBg}, Color: ${widgetColor}`;
+            } else {
+                updateStatus('❌ Widget not found on page', 'error');
+            }
+        }
+        
+        // Auto-test when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testColors();
+                checkWidget();
+            }, 2000);
+        });
+    </script>
+    
+    <!-- Load your widget script -->
+    <script src="https://located-dude-supporting-plugin.trycloudflare.com/embed?shop=voiceaidawnsol.myshopify.com&t=1234567890"></script>
+</body>
+</html>
