@@ -17,6 +17,12 @@ export default function App() {
           rel="stylesheet"
           href="https://cdn.shopify.com/static/fonts/inter/v4/styles.css"
         />
+            {/* App Bridge must be first script tag without defer/async */}
+            <script
+              src="https://cdn.shopify.com/shopifycloud/app-bridge.js"
+              crossOrigin="anonymous"
+            />
+        {/* CSP and X-Frame-Options are handled in HTTP headers, not meta tags */}
         <Meta />
         <Links />
       </head>

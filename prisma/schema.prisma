@@ -31,112 +31,102 @@ model Session {
   emailVerified Boolean?  @default(false)
 }
 
-model WidgetSettings {
-  id             String   @id @default(cuid())
-  shop           String   @unique
-  backgroundColor String  @default("#007bff")
-  iconColor      String   @default("#ffffff")
-  position       String   @default("right")
-  isActive       Boolean  @default(true)
-  publishedAt    DateTime?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-}
-
-// RAG Chatbot Models
-model Merchant {
-  id           String   @id @default(cuid())
-  shop         String   @unique
-  accessToken  String
-  settings     Json?    // Bot configuration, tone, etc.
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+// Plan Configuration
+model Plan {
+  id            String   @id @default(cuid())
+  name          String   @unique // 'free', 'starter', 'professional', 'enterprise'
+  displayName   String   // 'Free', 'Starter', 'Professional', 'Enterprise'
+  price         Float    @default(0) // Monthly price in USD
+  maxConversations Int   @default(100) // Monthly conversation limit
+  maxMessages   Int      @default(1000) // Monthly message limit
+  features      Json     // JSON array of features
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   
   // Relations
-  documents    Document[]
-  chats        Chat[]
-  webhooks     Webhook[]
+  shopPlans     ShopPlan[]
 }
 
-model Document {
-  id          String   @id @default(cuid())
-  merchantId  String
-  source      String   // 'product', 'collection', 'page', 'faq'
-  sourceId    String   // Shopify ID
-  title       String
-  content     String
-  embedding   String?  // Vector embedding (JSON string)
-  metadata    Json?    // Additional metadata
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-}
-
-model Chat {
-  id          String   @id @default(cuid())
-  merchantId  String
-  sessionId   String
-  customerId  String?
-  status      String   @default("active") // 'active', 'closed', 'escalated'
-  metadata    Json?    // Customer info, device, etc.
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  messages    Message[]
-}
-
-model Message {
-  id          String   @id @default(cuid())
-  chatId      String
-  sender      String   // 'customer', 'bot', 'agent'
-  text        String
-  metadata    Json?    // AI model used, confidence, etc.
-  createdAt   DateTime @default(now())
-  
-  // Relations
-  chat        Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-}
-
-model Webhook {
-  id          String   @id @default(cuid())
-  merchantId  String
-  topic       String   // 'products/create', 'products/update', etc.
-  isActive    Boolean  @default(true)
-  lastTrigger DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  // Relations
-  merchant    Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-}
-
-model IngestionJob {
-  id          String   @id @default(cuid())
-  merchantId  String
-  type        String   // 'full', 'incremental', 'webhook'
-  status      String   // 'pending', 'running', 'completed', 'failed'
-  progress    Int      @default(0)
-  total       Int      @default(0)
-  error       String?
-  metadata    Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+// Shop Plan Subscription
+model ShopPlan {
+  id            String   @id @default(cuid())
+  shop          String   @unique
+  planId        String
+  plan          Plan     @relation(fields: [planId], references: [id])
+  isActive      Boolean  @default(true)
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  conversationsUsed Int  @default(0) // Current month usage
+  messagesUsed  Int      @default(0) // Current month usage
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 // Floating Chat Widget Configuration
 model WidgetConfig {
+  id            String   @id @default(cuid())
+  shop          String   @unique
+  title         String   @default("Support Chat")
+  color         String   @default("#e63946")
+  greeting      String   @default("👋 Welcome! How can we help you?")
+  position      String   @default("right") // 'left' or 'right'
+  isActive      Boolean  @default(true)
+  
+  // Agent Persona Fields
+  agentName     String?  @default("Assistant")
+  agentRole     String?  @default("Customer Support")
+  responseLength String? @default("medium") // 'short', 'medium', 'long'
+  language      String?  @default("en")
+  tone          String?  @default("friendly") // 'friendly', 'professional', 'casual'
+  avatar        String?  @default("https://cdn.shopify.com/s/files/1/0780/7745/0100/files/default-avatar.png")
+  
+  // Agent Style Fields
+  colorScheme   String?  @default("0") // Color scheme index
+  startColor    String?  @default("#000000CF") // Gradient start color
+  endColor      String?  @default("#000000") // Gradient end color
+  chatBgColor   String?  @default("#FFFFFF") // Chat background color
+  fontFamily    String?  @default("inter, sans-serif") // Font family
+  fontColor     String?  @default("#000000CF") // Font color
+  openByDefault String?  @default("1") // When to open chat (0=never, 1=always, 5000=5s, 10000=10s)
+  isPulsing     Boolean? @default(false) // Pulsing animation
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Conversation History
+model Conversation {
   id        String   @id @default(cuid())
-  shop      String   @unique
-  title     String   @default("Support Chat")
-  color     String   @default("#e63946")
-  greeting  String   @default("👋 Welcome! How can we help you?")
-  position  String   @default("right") // 'left' or 'right'
-  isActive  Boolean  @default(true)
+  shop      String
+  sessionId String?  // For anonymous users
+  userId    String?  // For logged-in users
+  customerEmail String? // Customer email if available
+  customerName  String? // Customer name if available
+  status    String   @default("active") // 'active', 'closed', 'archived'
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // Relations
+  messages  Message[]
+  
+  @@index([shop])
+  @@index([sessionId])
+  @@index([userId])
+}
+
+// Individual Messages in Conversations
+model Message {
+  id             String   @id @default(cuid())
+  conversationId String
+  role           String   // 'user', 'assistant', 'system'
+  content        String
+  metadata       String?  // JSON string for additional data
+  timestamp      DateTime @default(now())
+  
+  // Relations
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@index([conversationId])
+  @@index([timestamp])
 }

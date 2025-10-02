@@ -1,0 +1,1150 @@
+{% comment %}
+  Floating Chat Widget - Theme Extension
+  This block adds a floating chat widget to your store
+  Configure settings through the Shopify admin dashboard
+{% endcomment %}
+
+{% if block.settings.enable_widget %}
+  <script>
+    // Widget configuration - ALWAYS fetch from database via API
+    window.floatingChatWidget = {
+      shop: '{{ shop.permanent_domain }}',
+      shopName: '{{ shop.name }}',
+      theme: '{{ theme.name }}',
+      currency: '{{ shop.currency }}',
+      locale: '{{ shop.locale }}',
+      publishedFromTheme: true,
+      useDatabaseConfig: true,  // Always use database configuration
+      apiUrl: 'https://seconds-giving-geo-lip.trycloudflare.com'
+    };
+    
+    // Debug logging
+    console.log('Floating Chat Widget: Theme extension loaded');
+    console.log('Floating Chat Widget: Will fetch from database via API');
+  </script>
+
+  <!-- Load widget script from app -->
+  <script>
+    // Ensure no module conflicts
+    if (typeof exports === 'undefined') {
+      window.exports = {};
+    }
+  </script>
+  <script>
+    // Inline widget code for immediate loading
+    (function() {
+      'use strict';
+      
+      // Configuration - Start with theme settings, then load from database
+      let config = {
+        title: '{{ block.settings.title | default: "Support Chat" }}',
+        color: '{{ block.settings.color | default: "#e63946" }}',
+        greeting: '{{ block.settings.greeting | default: "👋 Welcome! How can we help you?" }}',
+        position: '{{ block.settings.position | default: "right" }}',
+        isActive: {{ block.settings.enable_widget | default: true }},
+        shop: '{{ shop.permanent_domain }}',
+        agentName: 'Assistant',
+        agentRole: 'Customer Support',
+        responseLength: 'medium',
+        language: 'en',
+        tone: 'friendly',
+        avatar: 'https://cdn.shopify.com/s/files/1/0780/7745/0100/files/default-avatar.png'
+      };
+      
+      console.log('Initial widget configuration:', config);
+      
+        // Load configuration from database
+        async function loadConfigFromDatabase() {
+          try {
+            console.log('Loading configuration...');
+            
+            // Use theme configuration directly for now
+            console.log('Using theme configuration:', config);
+            updateWidgetWithConfig();
+            
+          } catch (error) {
+            console.log('Using theme configuration:', error);
+            updateWidgetWithConfig();
+          }
+        }
+      
+      // Update widget with current configuration
+      function updateWidgetWithConfig() {
+        console.log('Updating widget with configuration:', config);
+        
+        const avatarImg = document.querySelector('.ai-agent-chat-avatar img');
+        const headerAvatar = document.querySelector('.ai-agent-chat-header-avatar');
+        const headerName = document.querySelector('.ai-agent-chat-header-name');
+        const headerRole = document.querySelector('.ai-agent-chat-header-role');
+        const chatHeader = document.querySelector('.ai-agent-chat-header');
+        const iframe = document.querySelector('#form-agent-helper');
+        
+        // Update avatar
+        if (avatarImg) {
+          avatarImg.src = config.avatar;
+          console.log('Avatar updated:', config.avatar);
+        }
+        
+        // Update header avatar
+        if (headerAvatar) {
+          headerAvatar.src = config.avatar;
+          console.log('Header avatar updated:', config.avatar);
+        }
+        
+        // Update agent name
+        if (headerName) {
+          headerName.textContent = config.agentName;
+          console.log('Agent name updated:', config.agentName);
+        }
+        
+        // Update agent role
+        if (headerRole) {
+          headerRole.textContent = config.agentRole;
+          console.log('Agent role updated:', config.agentRole);
+        }
+        
+        // Update header color
+        if (chatHeader) {
+          chatHeader.style.background = config.color;
+          console.log('Header color updated:', config.color);
+        }
+        
+        // Update chat interface with new configuration
+        const chatMessages = document.getElementById('chat-messages');
+        if (chatMessages) {
+          // Update greeting message if it exists
+          const greetingMessage = chatMessages.querySelector('.ai-agent-message-bot .ai-agent-message-text');
+          if (greetingMessage) {
+            greetingMessage.textContent = config.greeting;
+          }
+          console.log('Chat interface updated with new configuration');
+        }
+        
+        console.log('Widget updated with configuration successfully');
+      }
+      
+      let isOpen = false;
+      let conversationId = null;
+      
+      // Generate session ID for anonymous users
+      function generateSessionId() {
+        return 'session_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+      }
+      
+      // Save message to localStorage for now (will be saved to database later)
+      function saveMessage(content, role) {
+        try {
+          const sessionId = generateSessionId();
+          const shop = '{{ shop.permanent_domain }}';
+          
+          // Create conversation ID if not exists
+          if (!conversationId) {
+            conversationId = 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          }
+          
+          // Save to localStorage for persistence
+          const messageData = {
+            id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            conversationId: conversationId,
+            role: role,
+            content: content,
+            timestamp: new Date().toISOString(),
+            shop: shop,
+            sessionId: sessionId
+          };
+          
+          // Get existing messages
+          const existingMessages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+          existingMessages.push(messageData);
+          
+          // Save back to localStorage
+          localStorage.setItem('chat_messages', JSON.stringify(existingMessages));
+          
+          console.log('Message saved locally:', messageData);
+        } catch (error) {
+          console.log('Error saving message:', error);
+        }
+      }
+      
+      // Generate AI response
+      function generateAIResponse(userMessage) {
+        const responses = [
+          "Thank you for your message! I'm here to help you with any questions you might have.",
+          "I understand your concern. Let me help you with that.",
+          "That's a great question! Let me provide you with some information.",
+          "I'm here to assist you. Could you please provide more details?",
+          "Thank you for reaching out. I'll do my best to help you.",
+          "I appreciate your message. Let me see how I can assist you.",
+          "That's an interesting point. Let me help you with that.",
+          "I'm here to support you. What specific information do you need?",
+          "Thank you for your patience. Let me help you with your request.",
+          "I understand. Let me provide you with the best solution."
+        ];
+        
+        return responses[Math.floor(Math.random() * responses.length)];
+      }
+      
+      // Create widget
+      function createWidget() {
+        const widgetContainer = document.createElement('div');
+        widgetContainer.id = 'jotform-agent-preview-root';
+        widgetContainer.innerHTML = `
+          <div class="embedded-agent-container align-${config.position}">
+            <div class="ai-agent-chat-avatar-container">
+              <div class="ai-agent-avatar-content">
+                <div class="ai-agent-avatar-content-wrapper">
+                  <div class="ai-agent-chat-avatar-pulse-wrapper">
+                    <div class="ai-agent-chat-avatar" style="background: linear-gradient(rgba(0, 0, 0, 0.81) 0%, rgb(0, 0, 0) 100%);">
+                      <img draggable="false" src="${config.avatar}" alt="agent" width="80" height="80">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+                    <div class="ai-agent-chat-animation-container">
+                      <div class="ai-agent-chat-cover">
+                        <div class="ai-agent-chat-widget" style="display: none;">
+                          <div class="ai-agent-chat-header" style="background: #2d3748;">
+                            <div class="ai-agent-chat-header-content">
+                              <img src="${config.avatar}" alt="${config.agentName}" class="ai-agent-chat-header-avatar">
+                              <div class="ai-agent-chat-header-info">
+                                <div class="ai-agent-chat-header-name">${config.agentName} <span class="ai-badge">AI</span></div>
+                                <div class="ai-agent-chat-header-role">voiceaimod Online Assistant</div>
+                              </div>
+                            </div>
+                            <button class="ai-agent-chat-close">×</button>
+                          </div>
+                          <div class="ai-agent-chat-body">
+                            <div class="flex flex-col grow-1 chat-bg gap-8 overflow-y-hidden relative pb-5">
+                              <div class="flex flex-col grow-1 overflow-y-auto overflow-x-hidden gap-8 lg:pr-3 chat-message-list transition-all duration-700 ease-in-out" id="chat-messages">
+                                <section class="flex flex-col self-start w-full gap-2 px-2 lg:px-8 anim anim-300 fade-in break-all group">
+                                  <div class="flex justify-start items-center flex w-full color-navy-300 gap-2 flex-wrap">
+                                    <h6 class="sr-only">${config.agentName} said:</h6>
+                                  </div>
+                                  <div class="flex gap-3 message-row">
+                                    <div class="inline-flex justify-center items-center shrink-0 radius-full overflow-hidden border border-white bg-avatar w-10 h-10">
+                                      <img class="w-full h-full radius-full" src="${config.avatar}" alt="Agent Avatar">
+                                    </div>
+                                    <div class="message-content min-w-0 relative h-max space-y-4 md:space-y-5">
+                                      <p class="flex items-center relative paragraph break-word">
+                                        <span class="relative generic-message">${config.greeting}</span>
+                                      </p>
+                                      <div class="typing">
+                                        <div class="my-4">
+                                          <div class="flex flex-wrap gap-2 multiple-choices">
+                                            <button type="button" class="btn-type-primary yes-no-button radius magnet-button inline-flex shrink-0 justify-center items-center font-medium duration-300 outline-2 outline-transparent outline-offset-0 focus:outline-opacity-50 h-10 px-2.5 border-0 cursor-pointer bg-navy-75 color-navy-500 hover:bg-navy-100 focus:outline-navy-50">
+                                              <span class="px-2 text-sm">Explore products 🛍️</span>
+                                            </button>
+                                            <button type="button" class="btn-type-primary yes-no-button radius magnet-button inline-flex shrink-0 justify-center items-center font-medium duration-300 outline-2 outline-transparent outline-offset-0 focus:outline-opacity-50 h-10 px-2.5 border-0 cursor-pointer bg-navy-75 color-navy-500 hover:bg-navy-100 focus:outline-navy-50">
+                                              <span class="px-2 text-sm">View shipping options 🚚</span>
+                                            </button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </section>
+                              </div>
+                            </div>
+                            <div class="flex shrink-0 chat-section chat-bg mt-3 lg:mt-5 radius-full newMobileInput">
+                              <div class="flex items-end relative grow-1 duration-300 gap-2">
+                                <div class="w-full flex flex-col">
+                                  <textarea rows="1" class="ai-input" id="chat-input" placeholder="Type here" aria-label="Chat With AI Agent" autocomplete="off" maxlength="4000"></textarea>
+                                  <div class="inputCharCount overflow-hidden text-right text-xs transition ease-out duration-300 h-0 mt-0">0/4000</div>
+                                </div>
+                              </div>
+                              <div class="flex items-center z-5 mr-2.5">
+                                <button role="button" tabindex="0" aria-label="Voice" type="button" class="newVoiceButton w-8 radius-full magnet-button inline-flex shrink-0 justify-center items-center font-medium duration-300 outline-2 outline-transparent outline-offset-0 focus:outline-opacity-50 h-8 px-2 border-0 cursor-pointer color-white bg-teams-default hover:bg-teams-dark focus:outline-teams-light" id="chat-send">
+                                  <span class="px-1 text-sm">
+                                    <div class="voice-animated-icon">
+                                      <div class="voice-bar"></div>
+                                      <div class="voice-bar"></div>
+                                      <div class="voice-bar"></div>
+                                    </div>
+                                    <span class="voice-text font-bold">Voice</span>
+                                  </span>
+                                </button>
+                              </div>
+                            </div>
+                            <div class="flex items-stretch h-16 w-full chatTabs bg-white border-t border-navy-100 mt-4">
+                              <button data-is-active="true" aria-label="Chat" aria-expanded="true" class="flex justify-center items-center flex-col grow-1 relative b-0 bg-white p-0 color-navy-700">
+                                <span class="absolute h-0.5 w-0 bg-navy-700 activeTabBorder duration-300 ease-in-out w-4/5"></span>
+                                <span class="relative">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+                                    <path fill-rule="evenodd" d="M4.4 3h13a2.4 2.4 0 0 1 2.4 2.4v4h-8a2.4 2.4 0 0 0-2.4 2.4v4.81l-2.715 2.068A.8.8 0 0 1 5.4 18.04V16h-1A2.4 2.4 0 0 1 2 13.6V5.4A2.4 2.4 0 0 1 4.4 3Zm8.1 8h8a1.5 1.5 0 0 1 1.5 1.5v5.004a1.5 1.5 0 0 1-1.5 1.5H20v1.498a.5.5 0 0 1-.827.379l-1.891-1.634a1 1 0 0 0-.654-.243H12.5a1.5 1.5 0 0 1-1.5-1.5V12.5a1.5 1.5 0 0 1 1.5-1.5Z" clip-rule="evenodd"></path>
+                                  </svg>
+                                </span>
+                                <span class="text-xs font-medium">Chat</span>
+                              </button>
+                              <button data-is-active="false" aria-label="Voice" aria-expanded="false" class="flex justify-center items-center flex-col grow-1 relative b-0 bg-white p-0 color-navy-300">
+                                <span class="absolute h-0.5 w-0 bg-navy-700 activeTabBorder duration-300 ease-in-out"></span>
+                                <span class="relative">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+                                    <path fill-rule="evenodd" d="M9.5 4a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2V4ZM2 11a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Zm17-4.5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-10a2 2 0 0 0-2-2h-1Z" clip-rule="evenodd"></path>
+                                  </svg>
+                                </span>
+                                <span class="text-xs font-medium">Voice</span>
+                              </button>
+                              <button data-is-active="false" aria-label="History" aria-expanded="false" class="flex justify-center items-center flex-col grow-1 relative b-0 bg-white p-0 color-navy-300">
+                                <span class="absolute h-0.5 w-0 bg-navy-700 activeTabBorder duration-300 ease-in-out"></span>
+                                <span class="relative">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-6 h-6">
+                                    <path fill-rule="evenodd" d="M5.978 18.689A8.967 8.967 0 0 0 12 21a8.967 8.967 0 0 0 6.022-2.311c-1.259-1.75-3.485-2.911-6.022-2.911-2.537 0-4.763 1.162-6.022 2.91ZM12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1Zm0 12.111A3.556 3.556 0 1 0 12 6a3.556 3.556 0 0 0 0 7.111Z" clip-rule="evenodd"></path>
+                                  </svg>
+                                </span>
+                                <span class="text-xs font-medium">History</span>
+                              </button>
+                            </div>
+                            <div class="privacyPolicy flex items-center justify-center gap-1 text-xs font-medium text-center bg-navy-25 lg:bg-transparent lg:h-4 lg:mt-3">
+                              <div class="flex items-center overflow-hidden">
+                                <div class="policyText mr-2">
+                                  <span>By chatting, you agree to <button type="button" class="underline">AI Terms</button>.</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+          </div>
+        `;
+        
+        // Add CSS
+        const style = document.createElement('style');
+        style.textContent = `
+          .embedded-agent-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          }
+          
+          .embedded-agent-container.align-left {
+            right: auto;
+            left: 20px;
+          }
+          
+                  .ai-agent-chat-avatar-container {
+                    position: relative;
+                    cursor: pointer;
+                    z-index: 1000;
+                  }
+          
+                  .ai-agent-chat-avatar {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 50%;
+                    overflow: hidden;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    transition: all 0.3s ease;
+                    cursor: pointer;
+                    user-select: none;
+                  }
+          
+          .ai-agent-chat-avatar:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+          }
+          
+          .ai-agent-chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+          }
+          
+                  .ai-agent-chat-avatar-pulse-wrapper {
+                    position: relative;
+                    cursor: pointer;
+                    z-index: 1001;
+                  }
+          
+          .ai-agent-chat-avatar-pulse-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            background: ${config.color};
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+          }
+          
+          @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.1); opacity: 0.1; }
+            100% { transform: scale(1); opacity: 0.3; }
+          }
+          
+          .ai-agent-chat-widget {
+            position: absolute;
+            bottom: 90px;
+            right: 0;
+            width: 320px;
+            height: 420px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+          }
+          
+          .embedded-agent-container.align-left .ai-agent-chat-widget {
+            right: auto;
+            left: 0;
+          }
+          
+          .ai-agent-chat-header {
+            padding: 16px;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          
+          .ai-agent-chat-header-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+          
+          .ai-agent-chat-header-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+          }
+          
+          .ai-agent-chat-header-info {
+            display: flex;
+            flex-direction: column;
+          }
+          
+          .ai-agent-chat-header-name {
+            font-weight: 600;
+            font-size: 14px;
+          }
+          
+          .ai-agent-chat-header-role {
+            font-size: 12px;
+            opacity: 0.9;
+          }
+          
+          .ai-agent-chat-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+                  .ai-agent-chat-body {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    padding: 0;
+                    overflow: hidden;
+                    background: #ffffff;
+                  }
+                  
+                  .chat-bg {
+                    background: #ffffff;
+                  }
+                  
+                  .chat-message-list {
+                    flex: 1;
+                    overflow-y: auto;
+                    overflow-x: hidden;
+                    gap: 2rem;
+                    padding: 0;
+                  }
+                  
+                  .message-row {
+                    display: flex;
+                    gap: 0.75rem;
+                    align-items: flex-start;
+                  }
+                  
+                  .bg-avatar {
+                    background: #f0f0f0;
+                    border: 1px solid #ffffff;
+                  }
+                  
+                  .radius-full {
+                    border-radius: 50%;
+                  }
+                  
+                  .w-10 {
+                    width: 2.5rem;
+                  }
+                  
+                  .h-10 {
+                    height: 2.5rem;
+                  }
+                  
+                  .message-content {
+                    min-width: 0;
+                    position: relative;
+                    height: max-content;
+                    space-y: 1rem;
+                  }
+                  
+                  .paragraph {
+                    display: flex;
+                    align-items: center;
+                    position: relative;
+                    word-break: break-word;
+                  }
+                  
+                  .generic-message {
+                    position: relative;
+                    font-size: 14px;
+                    line-height: 1.5;
+                    color: #333;
+                  }
+                  
+                  .multiple-choices {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 0.5rem;
+                  }
+                  
+                  .btn-type-primary {
+                    display: inline-flex;
+                    flex-shrink: 0;
+                    justify-content: center;
+                    align-items: center;
+                    font-weight: 500;
+                    transition-duration: 300ms;
+                    outline: 2px solid transparent;
+                    outline-offset: 0;
+                    height: 2.5rem;
+                    padding: 0 0.625rem;
+                    border: 0;
+                    cursor: pointer;
+                    background: rgba(0, 0, 0, 0.75);
+                    color: #4a5568;
+                    border-radius: 0.5rem;
+                  }
+                  
+                  .btn-type-primary:hover {
+                    background: rgba(0, 0, 0, 0.1);
+                  }
+                  
+                  .newMobileInput {
+                    display: flex;
+                    flex-shrink: 0;
+                    background: #ffffff;
+                    margin-top: 0.75rem;
+                    border-radius: 9999px;
+                    border: 1px solid #e2e8f0;
+                  }
+                  
+                  .ai-input {
+                    width: 100%;
+                    border: none;
+                    outline: none;
+                    background: transparent;
+                    padding: 0.75rem 1rem;
+                    font-size: 14px;
+                    line-height: 1.5;
+                    resize: none;
+                    max-height: 120px;
+                    min-height: 20px;
+                  }
+                  
+                  .ai-input::placeholder {
+                    color: #a0aec0;
+                  }
+                  
+                  .inputCharCount {
+                    overflow: hidden;
+                    text-align: right;
+                    font-size: 12px;
+                    transition: ease-out 300ms;
+                    height: 0;
+                    margin-top: 0;
+                  }
+                  
+                  .newVoiceButton {
+                    width: 2rem;
+                    border-radius: 50%;
+                    display: inline-flex;
+                    flex-shrink: 0;
+                    justify-content: center;
+                    align-items: center;
+                    font-weight: 500;
+                    transition-duration: 300ms;
+                    outline: 2px solid transparent;
+                    outline-offset: 0;
+                    height: 2rem;
+                    padding: 0 0.5rem;
+                    border: 0;
+                    cursor: pointer;
+                    color: white;
+                    background: #007bff;
+                  }
+                  
+                  .voice-animated-icon {
+                    display: flex;
+                    align-items: center;
+                    gap: 2px;
+                  }
+                  
+                  .voice-bar {
+                    width: 2px;
+                    height: 12px;
+                    background: white;
+                    border-radius: 1px;
+                    animation: voicePulse 1s infinite;
+                  }
+                  
+                  .voice-bar:nth-child(2) {
+                    animation-delay: 0.2s;
+                  }
+                  
+                  .voice-bar:nth-child(3) {
+                    animation-delay: 0.4s;
+                  }
+                  
+                  @keyframes voicePulse {
+                    0%, 100% { height: 4px; }
+                    50% { height: 12px; }
+                  }
+                  
+                  .voice-text {
+                    font-size: 10px;
+                    margin-left: 4px;
+                  }
+                  
+                  .newVoiceButton:hover {
+                    background: #0056b3;
+                  }
+                  
+                  .chatTabs {
+                    display: flex;
+                    align-items: stretch;
+                    height: 4rem;
+                    width: 100%;
+                    background: white;
+                    border-top: 1px solid #e2e8f0;
+                    margin-top: 1rem;
+                  }
+                  
+                  .chatTabs button {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    flex-grow: 1;
+                    position: relative;
+                    border: 0;
+                    background: white;
+                    padding: 0;
+                    color: #4a5568;
+                    cursor: pointer;
+                  }
+                  
+                  .chatTabs button[data-is-active="true"] {
+                    color: #2d3748;
+                  }
+                  
+                  .activeTabBorder {
+                    position: absolute;
+                    height: 2px;
+                    width: 0;
+                    background: #2d3748;
+                    transition: all 300ms ease-in-out;
+                    width: 80%;
+                  }
+                  
+                  .privacyPolicy {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.25rem;
+                    font-size: 12px;
+                    font-weight: 500;
+                    text-align: center;
+                    background: #f7fafc;
+                    height: 1rem;
+                    margin-top: 0.75rem;
+                  }
+                  
+                  .underline {
+                    text-decoration: underline;
+                    cursor: pointer;
+                  }
+                  
+                  .sr-only {
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    padding: 0;
+                    margin: -1px;
+                    overflow: hidden;
+                    clip: rect(0, 0, 0, 0);
+                    white-space: nowrap;
+                    border: 0;
+                  }
+                  
+                  .anim {
+                    animation-duration: 300ms;
+                    animation-fill-mode: both;
+                  }
+                  
+                  .fade-in {
+                    animation-name: fadeIn;
+                  }
+                  
+                  @keyframes fadeIn {
+                    from {
+                      opacity: 0;
+                      transform: translateY(10px);
+                    }
+                    to {
+                      opacity: 1;
+                      transform: translateY(0);
+                    }
+                  }
+          
+          .ai-agent-chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 16px;
+          }
+          
+          .ai-agent-chat-message {
+            margin-bottom: 12px;
+          }
+          
+          .ai-agent-message-content {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.4;
+          }
+          
+          .ai-agent-chat-input-area {
+            display: flex;
+            gap: 8px;
+          }
+          
+          .ai-agent-chat-input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+          }
+          
+          .ai-agent-chat-input:focus {
+            border-color: ${config.color};
+          }
+          
+          .ai-agent-chat-send {
+            background: ${config.color};
+            color: #fff;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+          }
+          
+          .ai-agent-chat-send:hover {
+            opacity: 0.9;
+          }
+        `;
+        
+        document.head.appendChild(style);
+        document.body.appendChild(widgetContainer);
+        
+        // Event listeners
+        const avatar = widgetContainer.querySelector('.ai-agent-chat-avatar');
+        const chatWidget = widgetContainer.querySelector('.ai-agent-chat-widget');
+        const closeButton = widgetContainer.querySelector('.ai-agent-chat-close');
+        const sendButton = widgetContainer.querySelector('.ai-agent-chat-send');
+        const chatInput = widgetContainer.querySelector('.ai-agent-chat-input');
+        
+        console.log('Widget elements found:');
+        console.log('Avatar:', avatar);
+        console.log('Chat Widget:', chatWidget);
+        console.log('Close Button:', closeButton);
+        console.log('Send Button:', sendButton);
+        console.log('Chat Input:', chatInput);
+        
+        // Test if elements are clickable
+        if (avatar) {
+          console.log('Avatar is clickable:', avatar.style.cursor);
+          console.log('Avatar parent:', avatar.parentElement);
+        }
+        
+                // Avatar click handler
+                if (avatar) {
+                  console.log('Adding click event listener to avatar');
+                  
+                  // Main click handler
+                  avatar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Avatar clicked! Current display:', chatWidget.style.display);
+                    console.log('Chat widget element:', chatWidget);
+                    
+                    if (chatWidget) {
+                      if (chatWidget.style.display === 'none' || !chatWidget.style.display) {
+                        chatWidget.style.display = 'flex';
+                        isOpen = true;
+                        console.log('Chat opened - display set to flex');
+                      } else {
+                        chatWidget.style.display = 'none';
+                        isOpen = false;
+                        console.log('Chat closed - display set to none');
+                      }
+                    } else {
+                      console.error('Chat widget element not found!');
+                    }
+                  });
+                  
+                  // Backup click handler on parent
+                  const avatarContainer = avatar.parentElement;
+                  if (avatarContainer) {
+                    avatarContainer.addEventListener('click', function(e) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('Avatar container clicked!');
+                      avatar.click();
+                    });
+                  }
+                  
+                  // Touch events for mobile
+                  avatar.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    console.log('Avatar touchstart event');
+                    avatar.click();
+                  });
+                  
+                  // Test click functionality
+                  setTimeout(() => {
+                    console.log('Testing avatar click...');
+                    console.log('Avatar element:', avatar);
+                    console.log('Avatar clickable:', avatar.style.cursor);
+                    console.log('Avatar parent:', avatar.parentElement);
+                    
+                    // Simulate click to test
+                    console.log('Simulating click test...');
+                    avatar.click();
+                  }, 2000);
+                  
+                } else {
+                  console.error('Avatar element not found!');
+                }
+        
+        closeButton.addEventListener('click', (e) => {
+          e.preventDefault();
+          chatWidget.style.display = 'none';
+          isOpen = false;
+        });
+        
+        // Create conversation session
+        function createConversationSession() {
+          try {
+            const sessionId = generateSessionId();
+            const shop = '{{ shop.permanent_domain }}';
+            
+            // Save conversation to localStorage
+            const conversationData = {
+              id: 'conv_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+              sessionId: sessionId,
+              shop: shop,
+              status: 'active',
+              createdAt: new Date().toISOString(),
+              messages: []
+            };
+            
+            localStorage.setItem('current_conversation', JSON.stringify(conversationData));
+            console.log('Conversation session created:', conversationData);
+            
+          } catch (error) {
+            console.log('Error creating conversation session:', error);
+          }
+        }
+        
+        // Chat functionality
+        function initializeChat() {
+          const chatInput = document.getElementById('chat-input');
+          const chatSend = document.getElementById('chat-send');
+          const chatMessages = document.getElementById('chat-messages');
+          
+          if (chatInput && chatSend && chatMessages) {
+            console.log('Initializing chat functionality');
+            
+            // Send message function
+            const sendMessage = () => {
+              const message = chatInput.value.trim();
+              if (!message) return;
+              
+              // Add user message to chat immediately
+              addMessageToChat(message, 'user');
+              chatInput.value = '';
+              chatSend.disabled = true;
+              
+              // Save message immediately
+              saveMessageToDatabase(message, 'user');
+              
+              // Simulate bot response
+              setTimeout(() => {
+                const botResponse = generateBotResponse(message);
+                addMessageToChat(botResponse, 'bot');
+                saveMessageToDatabase(botResponse, 'assistant');
+                chatSend.disabled = false;
+              }, 500);
+            };
+            
+            // Event listeners
+            chatSend.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+              }
+            });
+            
+            // Quick action buttons
+            const quickButtons = document.querySelectorAll('.btn-type-primary');
+            quickButtons.forEach(button => {
+              button.addEventListener('click', () => {
+                const buttonText = button.textContent.trim();
+                addMessageToChat(buttonText, 'user');
+                saveMessageToDatabase(buttonText, 'user');
+                
+                // Generate response for quick actions
+                setTimeout(() => {
+                  let response = '';
+                  if (buttonText.includes('products')) {
+                    response = "Great! I'd be happy to help you explore our products. What specific type of product are you looking for?";
+                  } else if (buttonText.includes('shipping')) {
+                    response = "I can help you with shipping information! We offer free shipping on orders over $50 and standard shipping takes 3-5 business days.";
+                  } else {
+                    response = "Thank you for your interest! How can I assist you further?";
+                  }
+                  
+                  addMessageToChat(response, 'bot');
+                  saveMessageToDatabase(response, 'assistant');
+                }, 300);
+              });
+            });
+            
+            console.log('Chat functionality initialized');
+          }
+        }
+        
+        // Add message to chat UI
+        function addMessageToChat(message, sender) {
+          const chatMessages = document.getElementById('chat-messages');
+          if (!chatMessages) return;
+          
+          const section = document.createElement('section');
+          section.className = 'flex flex-col self-start w-full gap-2 px-2 lg:px-8 anim anim-300 fade-in break-all group';
+          
+          const messageRow = document.createElement('div');
+          messageRow.className = 'flex gap-3 message-row';
+          
+          const avatar = sender === 'user' ? 
+            '<div class="inline-flex justify-center items-center shrink-0 radius-full overflow-hidden border border-white bg-avatar w-10 h-10"><img class="w-full h-full radius-full" src="https://cdn.shopify.com/s/files/1/0780/7745/0100/files/user-avatar.png" alt="User Avatar"></div>' :
+            `<div class="inline-flex justify-center items-center shrink-0 radius-full overflow-hidden border border-white bg-avatar w-10 h-10"><img class="w-full h-full radius-full" src="${config.avatar}" alt="Agent Avatar"></div>`;
+          
+          const messageContent = document.createElement('div');
+          messageContent.className = 'message-content min-w-0 relative h-max space-y-4 md:space-y-5';
+          
+          const paragraph = document.createElement('p');
+          paragraph.className = 'flex items-center relative paragraph break-word';
+          paragraph.innerHTML = `<span class="relative generic-message">${message}</span>`;
+          
+          messageContent.appendChild(paragraph);
+          messageRow.innerHTML = avatar;
+          messageRow.appendChild(messageContent);
+          section.appendChild(messageRow);
+          chatMessages.appendChild(section);
+          
+          // Auto scroll to bottom
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Generate bot response
+        function generateBotResponse(userMessage) {
+          const responses = [
+            "Thank you for your message! How can I help you further?",
+            "I understand your concern. Let me help you with that.",
+            "That's a great question! Here's what I can tell you...",
+            "I'm here to help! Could you provide more details?",
+            "Thank you for reaching out. I'll do my best to assist you."
+          ];
+          
+          return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        // Save message to database
+        function saveMessageToDatabase(message, role) {
+          try {
+            const conversationData = {
+              content: message,
+              role: role,
+              timestamp: new Date().toISOString(),
+              sessionId: generateSessionId(),
+              shop: '{{ shop.permanent_domain }}'
+            };
+            
+            // Save to localStorage immediately
+            const existingMessages = JSON.parse(localStorage.getItem('chat_messages') || '[]');
+            existingMessages.push(conversationData);
+            localStorage.setItem('chat_messages', JSON.stringify(existingMessages));
+            
+            console.log('Message saved instantly:', conversationData);
+            
+            // Also update current conversation
+            const currentConversation = JSON.parse(localStorage.getItem('current_conversation') || '{}');
+            if (currentConversation.id) {
+              if (!currentConversation.messages) {
+                currentConversation.messages = [];
+              }
+              currentConversation.messages.push({
+                id: 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                role: role,
+                content: message,
+                timestamp: conversationData.timestamp
+              });
+              currentConversation.updatedAt = new Date().toISOString();
+              localStorage.setItem('current_conversation', JSON.stringify(currentConversation));
+            }
+            
+          } catch (error) {
+            console.error('Error saving message:', error);
+          }
+        }
+        
+        // Initialize chat after widget is created
+        setTimeout(() => {
+          createConversationSession();
+          initializeChat();
+        }, 1000);
+        
+        document.addEventListener('click', (e) => {
+          if (isOpen && !widgetContainer.contains(e.target)) {
+            chatWidget.style.display = 'none';
+            isOpen = false;
+          }
+        });
+        
+        console.log('Floating Widget: Inline widget loaded successfully');
+        console.log('Floating Widget: Widget container added to DOM:', widgetContainer);
+        console.log('Floating Widget: Avatar element:', avatar);
+        console.log('Floating Widget: Chat widget element:', chatWidget);
+      }
+      
+      // Initialize when DOM is ready
+      async function initWidget() {
+        console.log('Initializing widget...');
+        createWidget();
+        
+        // Load configuration from database after widget is created
+        setTimeout(async () => {
+          console.log('Loading database configuration...');
+          await loadConfigFromDatabase();
+        }, 2000);
+        
+        // Configuration updates will be handled when deployed
+        console.log('Widget ready - configuration updates will be available when deployed');
+      }
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initWidget);
+      } else {
+        // Add small delay to ensure DOM is fully ready
+        setTimeout(initWidget, 100);
+      }
+    })();
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Floating Chat Widget",
+  "target": "head",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Floating Chat Widget Settings"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_widget",
+      "label": "Enable Floating Chat Widget",
+      "default": true,
+      "info": "Enable or disable the floating chat widget on your store"
+    },
+    {
+      "type": "header",
+      "content": "Appearance Settings"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Widget Title",
+      "default": "Support Chat",
+      "info": "Title that appears on the floating button"
+    },
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Widget Color",
+      "default": "#e63946",
+      "info": "Choose the color for the floating chat button"
+    },
+    {
+      "type": "textarea",
+      "id": "greeting",
+      "label": "Greeting Message",
+      "default": "👋 Welcome! How can we help you?",
+      "info": "Initial message shown to customers when they open the chat"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Widget Position",
+      "options": [
+        { "value": "right", "label": "Right Side" },
+        { "value": "left", "label": "Left Side" }
+      ],
+      "default": "right",
+      "info": "Choose which side of the screen the widget appears on"
+    },
+    {
+      "type": "header",
+      "content": "Advanced Settings"
+    },
+    {
+      "type": "paragraph",
+      "content": "For advanced configuration, visit the Floating Chat Widget app in your Shopify admin panel."
+    }
+  ]
+}
+{% endschema %}

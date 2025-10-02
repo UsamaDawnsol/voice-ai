@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Widget Click</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            background: #f3e5f5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info">
+        <h1>Floating Widget Click Test</h1>
+        <p>This page tests if the floating widget opens when clicked.</p>
+    </div>
+
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Look for the floating avatar in the bottom right corner</li>
+            <li>Click on the avatar</li>
+            <li>The chat widget should open</li>
+            <li>Check the browser console for debug messages</li>
+        </ol>
+    </div>
+
+    <div class="status">
+        <h3>Status:</h3>
+        <p id="status">Loading widget...</p>
+    </div>
+
+    <script>
+        // Set up widget configuration
+        window.floatingChatWidget = {
+            appUrl: 'http://localhost:51493',
+            shop: 'voiceaidawnsol.myshopify.com'
+        };
+
+        // Load the widget script
+        const script = document.createElement('script');
+        script.src = 'http://localhost:51493/floating-widget.js';
+        script.defer = true;
+        script.onload = function() {
+            document.getElementById('status').innerHTML = 'Widget loaded successfully! Look for the avatar in the bottom right corner.';
+            document.getElementById('status').style.color = 'green';
+        };
+        script.onerror = function() {
+            document.getElementById('status').innerHTML = 'Error loading widget script.';
+            document.getElementById('status').style.color = 'red';
+        };
+        document.head.appendChild(script);
+
+        // Listen for widget events
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'widget-debug') {
+                console.log('Widget Debug:', event.data.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+name = "Floating Chat Widget"
+
+uid = "bc92f47d-644f-3a48-7929-bc44422063da5916b910"
+
+type = "theme"
+target = "head"
+
+[build]
+command = ""
+watch = []
+
+[dev]
+entries = ["blocks/floating-chat-widget.liquid"]

@@ -24,6 +24,36 @@ const shopify = shopifyApp({
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
     : {}),
+  billing: {
+    // Free plan - no billing required
+    free: {
+      enabled: true,
+    },
+    // Starter plan - $29/month
+    starter: {
+      amount: 29.00,
+      currencyCode: "USD",
+      interval: "EVERY_30_DAYS",
+    },
+    // Professional plan - $79/month  
+    professional: {
+      amount: 79.00,
+      currencyCode: "USD",
+      interval: "EVERY_30_DAYS",
+    },
+    // Enterprise plan - $199/month
+    enterprise: {
+      amount: 199.00,
+      currencyCode: "USD", 
+      interval: "EVERY_30_DAYS",
+    },
+    // One-time purchase for credits
+    credits: {
+      amount: 9.99,
+      currencyCode: "USD",
+      oneTime: true,
+    },
+  },
   hooks: {
     afterAuth: async ({ session, admin }) => {
       debugLogger.logAuth('app_installed', session.shop, {

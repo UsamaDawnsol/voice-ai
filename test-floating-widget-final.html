@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floating Widget Test - Production Ready</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 50px;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        h2 {
+            color: #007bff;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        p { 
+            color: #666; 
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .feature-list {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list li {
+            margin-bottom: 8px;
+            color: #555;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .code-block {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 10px 10px 0;
+            transition: background-color 0.2s;
+        }
+        .button:hover {
+            background: #0056b3;
+        }
+        .button.secondary {
+            background: #6c757d;
+        }
+        .button.secondary:hover {
+            background: #545b62;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Floating Widget Test</h1>
+        <p>This page tests the production-ready floating chat widget system.</p>
+        
+        <div class="status success">
+            ✅ <strong>Widget System Status:</strong> Ready for testing
+        </div>
+
+        <h2>🎯 What You Should See</h2>
+        <div class="feature-list">
+            <ul>
+                <li><strong>Floating Button:</strong> A circular chat button (💬) in the bottom-right corner</li>
+                <li><strong>Professional Styling:</strong> Clean, modern design with smooth animations</li>
+                <li><strong>Chat Interface:</strong> Click the button to open a chat popup</li>
+                <li><strong>Responsive Design:</strong> Adapts to different screen sizes</li>
+                <li><strong>Interactive Features:</strong> Send messages, receive bot responses</li>
+            </ul>
+        </div>
+
+        <h2>🔧 Technical Features</h2>
+        <div class="feature-list">
+            <ul>
+                <li><strong>API Integration:</strong> Fetches configuration from backend</li>
+                <li><strong>Error Handling:</strong> Graceful fallbacks if API fails</li>
+                <li><strong>TypeScript Types:</strong> Fully typed for better development</li>
+                <li><strong>Clean Code:</strong> Production-ready, maintainable code</li>
+                <li><strong>Shopify Integration:</strong> Works with Shopify's script tag system</li>
+            </ul>
+        </div>
+
+        <h2>📱 Test Instructions</h2>
+        <ol>
+            <li>Look for the floating chat button (💬) in the bottom-right corner</li>
+            <li>Click the button to open the chat interface</li>
+            <li>Type a message and press Enter or click Send</li>
+            <li>Wait for the bot response (simulated)</li>
+            <li>Try closing and reopening the chat</li>
+            <li>Test on mobile by resizing your browser window</li>
+        </ol>
+
+        <h2>🛠️ Configuration</h2>
+        <p>The widget fetches its configuration from the API endpoint:</p>
+        <div class="code-block">
+            GET /api/floating-widget-data?shop=your-shop.myshopify.com
+        </div>
+
+        <h2>🎨 Customization</h2>
+        <p>You can customize the widget through the Shopify admin panel:</p>
+        <ul>
+            <li><strong>Title:</strong> Button and chat header text</li>
+            <li><strong>Color:</strong> Button and accent colors</li>
+            <li><strong>Position:</strong> Left or right side of screen</li>
+            <li><strong>Greeting:</strong> Initial message shown to customers</li>
+            <li><strong>Active/Inactive:</strong> Enable or disable the widget</li>
+        </ul>
+
+        <div class="status info">
+            💡 <strong>Note:</strong> This is a test page. In production, the widget will be automatically injected into your Shopify store.
+        </div>
+
+        <h2>🔗 Integration Methods</h2>
+        <p>The widget can be integrated in two ways:</p>
+        <ol>
+            <li><strong>Script Tag Injection:</strong> Automatically added to all pages</li>
+            <li><strong>Theme Extension:</strong> Added through Shopify's theme editor</li>
+        </ol>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e1e5e9;">
+            <p style="color: #999; font-size: 14px;">
+                Floating Chat Widget v1.0 - Production Ready
+            </p>
+        </div>
+    </div>
+
+    <!-- Simulate Shopify environment -->
+    <script>
+        // Simulate Shopify.shop for testing
+        window.Shopify = {
+            shop: "voiceaidawnsol.myshopify.com" // Replace with your actual shop domain
+        };
+    </script>
+    
+    <!-- Load the floating widget script -->
+    <script src="http://localhost:3000/floating-widget.js?shop=voiceaidawnsol.myshopify.com"></script>
+</body>
+</html>

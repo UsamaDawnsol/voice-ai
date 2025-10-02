@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floating Widget Test</title>
+    <title>Direct Widget Test</title>
     <style>
         body { 
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -36,15 +36,24 @@
             color: #155724;
             border: 1px solid #c3e6cb;
         }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Floating Widget Test</h1>
-        <p>This page tests the floating chat widget system.</p>
+        <h1>🚀 Direct Widget Test</h1>
+        <p>This page tests the floating chat widget directly without Shopify CLI.</p>
         
         <div class="status success">
-            ✅ <strong>Widget System Status:</strong> Ready for testing
+            ✅ <strong>Test Server Status:</strong> Running at localhost:3000
+        </div>
+
+        <div class="status info">
+            💡 <strong>Note:</strong> The widget should load from localhost:3000 and work properly.
         </div>
 
         <h2>🎯 What You Should See</h2>
@@ -64,6 +73,14 @@
             <li>Wait for the bot response (simulated)</li>
             <li>Try closing and reopening the chat</li>
         </ol>
+
+        <h2>🔧 Debug Information</h2>
+        <p>Check the browser console for debug messages:</p>
+        <ul>
+            <li>"Floating Widget: Theme extension loaded"</li>
+            <li>"Floating Widget: Will fetch from database via API"</li>
+            <li>"Floating Widget: Configuration loaded from database"</li>
+        </ul>
     </div>
 
     <!-- Simulate Shopify environment -->
@@ -78,9 +95,13 @@
             shop: "voiceaidawnsol.myshopify.com",
             apiUrl: "http://localhost:3000"
         };
+        
+        console.log("Direct Widget Test: Environment configured");
+        console.log("Direct Widget Test: Shopify.shop =", window.Shopify.shop);
+        console.log("Direct Widget Test: floatingChatWidget =", window.floatingChatWidget);
     </script>
     
-    <!-- Load the floating widget script -->
+    <!-- Load the floating widget script directly -->
     <script src="http://localhost:3000/floating-widget.js?shop=voiceaidawnsol.myshopify.com"></script>
 </body>
 </html>

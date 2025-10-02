@@ -1,0 +1,1 @@
+[2025-10-01T22:59:19.783Z] [INFO] Auth Event: app_installed | {"shop":"voiceaidawnsol.myshopify.com","sessionId":"offline_voiceaidawnsol.myshopify.com","isOnline":false,"scope":"read_content,read_orders,read_products,write_script_tags,write_themes"}

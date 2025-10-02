@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Static Widget Test</title>
+    <style>
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 50px;
+            background: #f8f9fa;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Static Widget Test</h1>
+        <p>This page tests the floating chat widget with static configuration.</p>
+        
+        <div class="status success">
+            ✅ <strong>Widget Status:</strong> Loaded with static configuration
+        </div>
+
+        <h2>🎯 What You Should See</h2>
+        <ul>
+            <li><strong>Floating Button:</strong> A circular chat button (💬) in the bottom-right corner</li>
+            <li><strong>Professional Styling:</strong> Clean, modern design with smooth animations</li>
+            <li><strong>Chat Interface:</strong> Click the button to open a chat popup</li>
+            <li><strong>Responsive Design:</strong> Adapts to different screen sizes</li>
+            <li><strong>Interactive Features:</strong> Send messages, receive bot responses</li>
+        </ul>
+
+        <h2>📱 Test Instructions</h2>
+        <ol>
+            <li>Look for the floating chat button (💬) in the bottom-right corner</li>
+            <li>Click the button to open the chat interface</li>
+            <li>Type a message and press Enter or click Send</li>
+            <li>Wait for the bot response (simulated)</li>
+            <li>Try closing and reopening the chat</li>
+        </ol>
+    </div>
+
+    <!-- Simulate Shopify environment -->
+    <script>
+        // Simulate Shopify.shop for testing
+        window.Shopify = {
+            shop: "voiceaidawnsol.myshopify.com"
+        };
+        
+        // Configure widget for static testing
+        window.floatingChatWidget = {
+            shop: "voiceaidawnsol.myshopify.com",
+            apiUrl: "http://localhost:3000"
+        };
+        
+        console.log("Static Widget Test: Environment configured");
+    </script>
+    
+    <!-- Inline widget script for testing -->
+    <script>
+        /**
+         * Floating Chat Widget - Static Test Version
+         * A simplified version for testing without external dependencies
+         */
+        (function() {
+            'use strict';
+
+            // Configuration
+            let config = {
+                title: 'Support Chat',
+                color: '#e63946',
+                greeting: '👋 Welcome! How can we help you?',
+                position: 'right',
+                isActive: true,
+                shop: 'voiceaidawnsol.myshopify.com',
+                messages: []
+            };
+
+            let isOpen = false;
+            let isLoaded = false;
+
+            // DOM elements
+            let button, chatBox, chatBody, chatInput, sendButton, closeButton;
+
+            /**
+             * Initialize the widget
+             */
+            async function init() {
+                if (isLoaded) return;
+                
+                console.log('Static Widget: Initializing with static config');
+                console.log('Static Widget: Config:', config);
+
+                // Only render if widget is active
+                if (!config.isActive) {
+                    console.log('Static Widget: Widget is disabled');
+                    return;
+                }
+
+                // Create and render widget
+                createWidget();
+                attachEventListeners();
+                
+                isLoaded = true;
+                console.log('Static Widget: Initialized successfully');
+            }
+
+            /**
+             * Create the floating widget elements
+             */
+            function createWidget() {
+                // Remove existing widget if it exists
+                const existingButton = document.getElementById('floating-chat-button');
+                const existingChatBox = document.getElementById('floating-chat-box');
+                
+                if (existingButton) existingButton.remove();
+                if (existingChatBox) existingChatBox.remove();
+
+                // Create floating button
+                button = document.createElement('div');
+                button.id = 'floating-chat-button';
+                button.innerHTML = '💬';
+                button.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    ${config.position}: 20px;
+                    width: 60px;
+                    height: 60px;
+                    background: ${config.color};
+                    color: #fff;
+                    font-size: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 9999;
+                    transition: all 0.3s ease;
+                    border: none;
+                    outline: none;
+                `;
+
+                // Create chat box
+                chatBox = document.createElement('div');
+                chatBox.id = 'floating-chat-box';
+                chatBox.style.cssText = `
+                    position: fixed;
+                    bottom: 90px;
+                    ${config.position}: 20px;
+                    width: 320px;
+                    height: 420px;
+                    background: #fff;
+                    border: 1px solid #e1e5e9;
+                    border-radius: 12px;
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                    display: none;
+                    flex-direction: column;
+                    z-index: 9999;
+                    transition: all 0.3s ease;
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                `;
+
+                // Create chat header
+                const header = document.createElement('div');
+                header.style.cssText = `
+                    background: ${config.color};
+                    color: #fff;
+                    padding: 16px;
+                    border-radius: 12px 12px 0 0;
+                    font-weight: 600;
+                    font-size: 16px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                `;
+                header.innerHTML = `
+                    <span>${config.title}</span>
+                    <button id="floating-chat-close" style="
+                        background: none;
+                        border: none;
+                        color: #fff;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 0;
+                        width: 24px;
+                        height: 24px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    ">&times;</button>
+                `;
+
+                // Create chat body
+                chatBody = document.createElement('div');
+                chatBody.id = 'chat-body';
+                chatBody.style.cssText = `
+                    flex: 1;
+                    padding: 16px;
+                    overflow-y: auto;
+                    font-size: 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    background: #f8f9fa;
+                `;
+
+                // Add initial greeting message
+                const greetingMessage = document.createElement('div');
+                greetingMessage.style.cssText = `
+                    background: #e3f2fd;
+                    padding: 12px;
+                    border-radius: 8px;
+                    align-self: flex-start;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                    font-size: 14px;
+                    line-height: 1.4;
+                `;
+                greetingMessage.textContent = config.greeting;
+                chatBody.appendChild(greetingMessage);
+
+                // Create input area
+                const inputArea = document.createElement('div');
+                inputArea.style.cssText = `
+                    padding: 16px;
+                    border-top: 1px solid #e1e5e9;
+                    display: flex;
+                    gap: 8px;
+                    background: #fff;
+                    border-radius: 0 0 12px 12px;
+                `;
+
+                chatInput = document.createElement('input');
+                chatInput.id = 'chat-input';
+                chatInput.type = 'text';
+                chatInput.placeholder = 'Type a message...';
+                chatInput.style.cssText = `
+                    flex: 1;
+                    padding: 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    font-size: 14px;
+                    outline: none;
+                    transition: border-color 0.2s ease;
+                `;
+
+                sendButton = document.createElement('button');
+                sendButton.id = 'chat-send';
+                sendButton.textContent = 'Send';
+                sendButton.style.cssText = `
+                    padding: 12px 16px;
+                    background: ${config.color};
+                    color: #fff;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    font-weight: 500;
+                    transition: background-color 0.2s ease;
+                `;
+
+                // Assemble chat box
+                inputArea.appendChild(chatInput);
+                inputArea.appendChild(sendButton);
+                chatBox.appendChild(header);
+                chatBox.appendChild(chatBody);
+                chatBox.appendChild(inputArea);
+
+                // Add elements to DOM
+                document.body.appendChild(button);
+                document.body.appendChild(chatBox);
+            }
+
+            /**
+             * Attach event listeners
+             */
+            function attachEventListeners() {
+                // Toggle chat on button click
+                button.addEventListener('click', toggleChat);
+
+                // Close chat on close button click
+                closeButton = chatBox.querySelector('#floating-chat-close');
+                closeButton.addEventListener('click', closeChat);
+
+                // Send message on send button click
+                sendButton.addEventListener('click', sendMessage);
+
+                // Send message on Enter key
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+
+                // Close chat when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (isOpen && !chatBox.contains(e.target) && !button.contains(e.target)) {
+                        closeChat();
+                    }
+                });
+            }
+
+            /**
+             * Toggle chat visibility
+             */
+            function toggleChat() {
+                if (isOpen) {
+                    closeChat();
+                } else {
+                    openChat();
+                }
+            }
+
+            /**
+             * Open chat
+             */
+            function openChat() {
+                isOpen = true;
+                chatBox.style.display = 'flex';
+                chatInput.focus();
+                
+                // Scroll to bottom
+                setTimeout(() => {
+                    chatBody.scrollTop = chatBody.scrollHeight;
+                }, 100);
+            }
+
+            /**
+             * Close chat
+             */
+            function closeChat() {
+                isOpen = false;
+                chatBox.style.display = 'none';
+            }
+
+            /**
+             * Send a message
+             */
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Add user message to chat
+                addMessage('user', message);
+                chatInput.value = '';
+
+                // Simulate bot response
+                setTimeout(() => {
+                    const responses = [
+                        "Thanks for your message! We'll get back to you shortly.",
+                        "I've received your message and will respond soon.",
+                        "Thank you for contacting us. We'll be in touch!",
+                        "Your message has been received. We'll get back to you as soon as possible."
+                    ];
+                    const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                    addMessage('bot', randomResponse);
+                }, 1000);
+            }
+
+            /**
+             * Add a message to the chat
+             */
+            function addMessage(from, text) {
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = `
+                    padding: 12px;
+                    border-radius: 8px;
+                    max-width: 80%;
+                    word-wrap: break-word;
+                    font-size: 14px;
+                    line-height: 1.4;
+                    ${from === 'user' 
+                        ? 'background: #007bff; color: #fff; align-self: flex-end; text-align: right;' 
+                        : 'background: #e3f2fd; color: #333; align-self: flex-start;'
+                    }
+                `;
+                messageDiv.textContent = text;
+                chatBody.appendChild(messageDiv);
+                
+                // Scroll to bottom
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+            // Expose widget API for external control
+            window.StaticFloatingChatWidget = {
+                open: openChat,
+                close: closeChat,
+                toggle: toggleChat,
+                isOpen: () => isOpen,
+                config: config
+            };
+
+        })();
+    </script>
+</body>
+</html>

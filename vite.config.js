@@ -73,6 +73,7 @@ export default defineConfig({
   },
   define: {
     global: "globalThis",
+    exports: "{}",
   },
   resolve: {
     alias: {

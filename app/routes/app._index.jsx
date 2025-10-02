@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useFetcher } from "@remix-run/react";
+import { useFetcher, useLoaderData, redirect } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -11,14 +11,36 @@ import {
   List,
   Link,
   InlineStack,
+  Badge,
+  Divider,
+  Icon,
+  CalloutCard,
+  ProgressBar,
+  EmptyState,
 } from "@shopify/polaris";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
+import { ChatIcon, ChartLineIcon, CreditCardIcon, StarIcon, CheckIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
-  await authenticate.admin(request);
+  const { session } = await authenticate.admin(request);
 
-  return null;
+  // Check if this is a new installation
+  const shopPlan = await prisma.shopPlan.findUnique({
+    where: { shop: session.shop }
+  });
+  
+  const widgetConfig = await prisma.widgetConfig.findUnique({
+    where: { shop: session.shop }
+  });
+  
+  // If no plan or config exists, redirect to welcome page
+  if (!shopPlan || !widgetConfig) {
+    return redirect("/app/welcome");
+  }
+
+  return { shop: session.shop };
 };
 
 export const action = async ({ request }) => {
@@ -87,6 +109,7 @@ export const action = async ({ request }) => {
 };
 
 export default function Index() {
+  const { shop } = useLoaderData();
   const fetcher = useFetcher();
   const shopify = useAppBridge();
   const isLoading =
@@ -106,207 +129,184 @@ export default function Index() {
 
   return (
     <Page>
-      <TitleBar title="Voice AI - Floating Widget">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
-      </TitleBar>
-      <BlockStack gap="500">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <BlockStack gap="500">
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Welcome to Voice AI Widget 🎤
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    Create a floating Voice AI assistant for your store that customers can interact with using voice or text. 
-                    Customize the design, position, and colors through the{" "}
-                    <Link url="/app/widget-settings" removeUnderline>
-                      Widget Settings
-                    </Link>{" "}
-                    page, or install the{" "}
-                    <Link url="/app/additional" removeUnderline>
-                      theme extension
-                    </Link>{" "}
-                    for easy setup.
-                  </Text>
-                </BlockStack>
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    Features
-                  </Text>
-                  <Text as="p" variant="bodyMd">
-                    • Floating widget that appears on your store pages<br/>
-                    • Voice input using browser speech recognition<br/>
-                    • Text-based chat interface<br/>
-                    • Customizable colors and position<br/>
-                    • Easy installation via theme extension or embed code<br/>
-                    • Mobile-responsive design
-                  </Text>
-                </BlockStack>
-                <InlineStack gap="300">
+      <TitleBar title="Voice AI Chatbot" />
+      <Layout>
+        {/* Hero Section */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="500">
+              <BlockStack gap="300">
+                <InlineStack align="space-between" blockAlign="center">
+                  <BlockStack gap="200">
+                    <Text as="h1" variant="headingLg">
+                      Welcome to Voice AI Chatbot
+                    </Text>
+                    <Text variant="bodyLg" color="subdued">
+                      AI-powered customer support that engages your customers 24/7
+                    </Text>
+                  </BlockStack>
+                  <Badge status="success">Active</Badge>
+                </InlineStack>
+                
+                <Divider />
+                
+                <InlineStack gap="400">
                   <Button 
-                    url="/app/widget-settings" 
+                    url="/app/floating-widget-pro" 
                     variant="primary"
+                    size="large"
+                    icon={ChatIcon}
                   >
-                    Configure Widget
+                    Configure Chatbot
                   </Button>
                   <Button 
-                    url="/app/additional" 
+                    url="/app/conversation-history" 
                     variant="secondary"
+                    size="large"
+                    icon={ChartLineIcon}
                   >
-                    View Theme Extension
+                    View Analytics
                   </Button>
                 </InlineStack>
-                {fetcher.data?.product && (
-                  <>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productCreate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(fetcher.data.product, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productVariantsBulkUpdate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(fetcher.data.variant, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                  </>
-                )}
+              </BlockStack>
+            </BlockStack>
+          </Card>
+        </Layout.Section>
+
+        {/* Quick Stats */}
+        <Layout.Section>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+            gap: '16px' 
+          }}>
+            <Card sectioned>
+              <BlockStack gap="200">
+                <Text variant="headingMd">Active Conversations</Text>
+                <Text variant="heading2xl" fontWeight="bold">0</Text>
+                <Text variant="bodyMd" color="subdued">This month</Text>
               </BlockStack>
             </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <BlockStack gap="500">
-              <Card>
+            
+            <Card sectioned>
+              <BlockStack gap="200">
+                <Text variant="headingMd">Messages Sent</Text>
+                <Text variant="heading2xl" fontWeight="bold">0</Text>
+                <Text variant="bodyMd" color="subdued">This month</Text>
+              </BlockStack>
+            </Card>
+            
+            <Card sectioned>
+              <BlockStack gap="200">
+                <Text variant="headingMd">Response Time</Text>
+                  <Text variant="heading2xl" fontWeight="bold">&lt; 1s</Text>
+                <Text variant="bodyMd" color="subdued">Average</Text>
+              </BlockStack>
+            </Card>
+          </div>
+        </Layout.Section>
+
+        {/* Quick Actions */}
+        <Layout.Section>
+          <BlockStack gap="400">
+            <Text variant="headingMd">Quick Actions</Text>
+            
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: '16px' 
+            }}>
+              <CalloutCard
+                title="Configure Your Chatbot"
+                illustration="https://cdn.shopify.com/s/files/1/0780/7745/0100/files/chat-icon.png"
+                primaryAction={{
+                  content: "Open Settings",
+                  url: "/app/floating-widget-pro"
+                }}
+              >
+                <p>Customize your AI chatbot's personality, appearance, and behavior to match your brand.</p>
+              </CalloutCard>
+              
+              <CalloutCard
+                title="View Analytics"
+                illustration="https://cdn.shopify.com/s/files/1/0780/7745/0100/files/analytics-icon.png"
+                primaryAction={{
+                  content: "View Reports",
+                  url: "/app/conversation-history"
+                }}
+              >
+                <p>Track customer conversations and measure your chatbot's performance.</p>
+              </CalloutCard>
+              
+              <CalloutCard
+                title="Upgrade Plan"
+                illustration="https://cdn.shopify.com/s/files/1/0780/7745/0100/files/upgrade-icon.png"
+                primaryAction={{
+                  content: "View Plans",
+                  url: "/app/plans"
+                }}
+              >
+                <p>Unlock more features and higher limits with a premium plan.</p>
+              </CalloutCard>
+            </div>
+          </BlockStack>
+        </Layout.Section>
+
+        {/* Features Overview */}
+        <Layout.Section>
+          <Card>
+            <BlockStack gap="400">
+              <Text variant="headingMd">What's Included</Text>
+              
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
+                gap: '16px' 
+              }}>
                 <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    App template specs
+                  <InlineStack gap="200" blockAlign="center">
+                    <Icon source={CheckIcon} color="success" />
+                    <Text variant="bodyMd" fontWeight="bold">AI-Powered Responses</Text>
+                  </InlineStack>
+                  <Text variant="bodyMd" color="subdued">
+                    Intelligent chatbot that understands customer questions and provides helpful answers.
                   </Text>
-                  <BlockStack gap="200">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Framework
-                      </Text>
-                      <Link
-                        url="https://remix.run"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Remix
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Database
-                      </Text>
-                      <Link
-                        url="https://www.prisma.io/"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Prisma
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Interface
-                      </Text>
-                      <span>
-                        <Link
-                          url="https://polaris.shopify.com"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          Polaris
-                        </Link>
-                        {", "}
-                        <Link
-                          url="https://shopify.dev/docs/apps/tools/app-bridge"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          App Bridge
-                        </Link>
-                      </span>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        API
-                      </Text>
-                      <Link
-                        url="https://shopify.dev/docs/api/admin-graphql"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphQL API
-                      </Link>
-                    </InlineStack>
-                  </BlockStack>
                 </BlockStack>
-              </Card>
-              <Card>
+                
                 <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Next steps
+                  <InlineStack gap="200" blockAlign="center">
+                    <Icon source={CheckIcon} color="success" />
+                    <Text variant="bodyMd" fontWeight="bold">Customizable Design</Text>
+                  </InlineStack>
+                  <Text variant="bodyMd" color="subdued">
+                    Match your brand with custom colors, fonts, and positioning options.
                   </Text>
-                  <List>
-                    <List.Item>
-                      Build an{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        {" "}
-                        example app
-                      </Link>{" "}
-                      to get started
-                    </List.Item>
-                    <List.Item>
-                      Explore Shopify’s API with{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphiQL
-                      </Link>
-                    </List.Item>
-                  </List>
                 </BlockStack>
-              </Card>
+                
+                <BlockStack gap="200">
+                  <InlineStack gap="200" blockAlign="center">
+                    <Icon source={CheckIcon} color="success" />
+                    <Text variant="bodyMd" fontWeight="bold">24/7 Availability</Text>
+                  </InlineStack>
+                  <Text variant="bodyMd" color="subdued">
+                    Your chatbot never sleeps, providing instant support to customers anytime.
+                  </Text>
+                </BlockStack>
+                
+                <BlockStack gap="200">
+                  <InlineStack gap="200" blockAlign="center">
+                    <Icon source={CheckIcon} color="success" />
+                    <Text variant="bodyMd" fontWeight="bold">Mobile Responsive</Text>
+                  </InlineStack>
+                  <Text variant="bodyMd" color="subdued">
+                    Optimized for all devices, ensuring great experience on mobile and desktop.
+                  </Text>
+                </BlockStack>
+              </div>
             </BlockStack>
-          </Layout.Section>
-        </Layout>
-      </BlockStack>
+          </Card>
+        </Layout.Section>
+      </Layout>
     </Page>
   );
 }
